@@ -12,12 +12,12 @@
         
         <!-- Section du tableau de bord -->
         <div class="row dash-1">
-            <div class="col-2 border-end border-secondary text-center">
+            <div class="col-md-2 border-end border-secondary text-center">
                 <?php
                     include './navbar.php';
                 ?>    
             </div>
-            <div class="col">
+            <div class="col-md col-12">
                 <div class="row page-title ">
                     <div class="fs-2 mt-3"> Tableau de Bord </div>
                 </div>
