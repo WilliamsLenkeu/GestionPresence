@@ -1,7 +1,17 @@
+@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&display=swap");
+
+*{
+    font-family: "Montserrat", sans-serif;
+}
+
 .dash {
     height: 100vh;
 }
 
 .dash-1 {
     height: 100vh;
+}
+
+.page-title{
+    background-color: rgb(234, 234, 234);
 }

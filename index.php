@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="./style.css" type="text/css" />
   </head>
-  <body class="text-bg-dar">
+  <body class="fw-bold">
     <div class="container-fluid dash">
         
         <!-- Section du tableau de bord -->
@@ -17,15 +17,11 @@
                     include './navbar.php';
                 ?>    
             </div>
-            <div class="col mx-3">
-                <div class="row">
-                    <nav class="navbar navbar-expand-lg bg-body-tertiary">
-                        <div class="container-fluid">
-                        <a class="navbar-brand" href="#">Navbar</a>
-                        </div>
-                    </nav>
+            <div class="col">
+                <div class="row page-title ">
+                    <div class="fs-2 mt-3"> Tableau de Bord </div>
                 </div>
-                <div class="row mt-4">
+                <div class="row mt-4 fw-normal">
                     <!-- Carte des étudiants avec le plus d'absences -->
                     <div class="col-md-6 my-2">
                         <div class="card">
