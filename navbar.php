@@ -6,7 +6,9 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav pt-1 flex-column me-auto mb-2 mb-lg-0 w-100">
                 <liv class="nav-item mt-2 mb-3">
-                    <a class="navbar-brand" href="./index.php">GestPresence</a>
+                    <a class="navbar-brand" href="./index.php">
+                        <img src="./image/logo-banner.jpg" alt="" class="img-fluid">
+                    </a>
                 </liv>
                 <li class="nav-item btn btn-outline-secondary my-2">
                     <a class="nav-link" aria-current="page" href="./index.php">

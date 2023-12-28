@@ -6,7 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Tableau de Bord - Administrateur</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="./style.css" type="text/css" />
+    <link rel="stylesheet" href="./css/style.css" type="text/css" />
+    <link rel="icon" href="./image/logo.jpg" type="image/x-icon">
+    <link rel="shortcut icon" href="./image/logo.jpg" type="image/x-icon">
 </head>
 
 <body class="fw-bold">
@@ -20,14 +22,13 @@
                 ?>
             </div>
             <div class="col-md col-12">
-                <div class="row page-title ">
+                <div class="row page-title shadow-lg">
                     <div class="fs-2 mt-3"> Listes D'appels </div>
                 </div>
                 <div class="row mt-4 fw-normal">
                     
                 </div>
             </div>
-            <!-- Colonne de droite pour les informations de l'utilisateur -->
             <div class="col-md-2 border-start border-secondary">
                 <div class="card my-3">
                     <div class="card-header">
