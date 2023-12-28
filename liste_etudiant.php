@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="fr">
 
 <head>
@@ -17,7 +17,7 @@
         <div class="row dash-1">
             <div class="col-md-2 border-end border-secondary text-center">
                 <?php
-                include './navbar.php';
+                    include './templates/navbar.php';
                 ?>
             </div>
             <div class="col-md col-12">
@@ -31,8 +31,8 @@
                     </div>
 
                     <!-- Options de tri -->
-                    <div class="mb-3">
-                        <label for="sortOptions" class="form-label">Trier par :</label>
+                    <div class="mb-3 form-inline">
+                        <label for="sortOptions" class="form-label mr-2">Trier par :</label>
                         <select class="form-select" id="sortOptions">
                             <option value="classe">Classe</option>
                             <option value="age">Âge</option>
@@ -66,7 +66,17 @@
                                     array("009", "Daniel Davis", "Classe B", "1997-11-22"),
                                     array("010", "Laura Wilson", "Classe C", "1995-06-08"),
                                     array("011", "Tom Parker", "Classe C", "1999-01-14"),
+                                    array("012", "Emma Lee", "Classe A", "1998-09-03"),
+                                    array("013", "William Brown", "Classe B", "1997-04-17"),
+                                    array("014", "Olivia Smith", "Classe A", "1996-10-28"),
+                                    array("015", "Liam Davis", "Classe C", "1998-07-12"),
+                                    array("016", "Ava Johnson", "Classe A", "1999-02-22"),
+                                    array("017", "Mia Wilson", "Classe B", "1995-11-14"),
+                                    array("018", "Noah Green", "Classe C", "1994-04-30"),
+                                    array("019", "Sophia White", "Classe A", "1996-12-05"),
+                                    array("020", "Ethan Miller", "Classe C", "1997-08-19")
                                 );
+                                
                                 
 
                                 // Fonction pour trier les étudiants par classe
@@ -104,23 +114,9 @@
             </div>
             <!-- Colonne de droite pour les informations de l'utilisateur -->
             <div class="col-md-2 border-start border-secondary">
-                <div class="card my-3">
-                    <div class="card-header">
-                        <h5 class="card-title mb-0">Informations Utilisateur</h5>
-                    </div>
-                    <div class="card-body">
-                        <!-- Afficher les détails de l'utilisateur ici -->
-                        <!-- <h6 class="card-subtitle mb-2 text-muted">Nom Utilisateur</h6> -->
-                        <p class="card-text">Nom D'Utilisateur</p>
-                        <p class="card-text">Etablissement: abcdef</p>
-                        <p class="card-text">Email: utilisateur@example.com</p>
-                        <!-- Ajoutez d'autres informations de l'utilisateur ici -->
-                    </div>
-                    <div class="card-footer bg-transparent border-top-0">
-                        <!-- Bouton pour accéder au profil -->
-                        <a href="#" class="btn btn-light btn-sm">Voir Profil</a>
-                    </div>
-                </div>
+                <?php
+                    include './templates/user-card.php';
+                ?>
             </div>
         </div>
     </div>
@@ -129,60 +125,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
 
     <!-- Script pour la recherche et le tri -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            // Référence aux éléments du DOM
-            var searchInput = document.getElementById('searchInput');
-            var sortOptions = document.getElementById('sortOptions');
-            var tableBody = document.querySelector('.table tbody');
-
-            // Fonction pour filtrer les résultats en fonction de la recherche
-            function filterResults() {
-                var searchTerm = searchInput.value.toLowerCase();
-
-                // Afficher ou masquer les lignes du tableau en fonction de la recherche
-                Array.from(tableBody.rows).forEach(function (row) {
-                    var shouldShow = Array.from(row.cells).some(function (cell) {
-                        return cell.textContent.toLowerCase().includes(searchTerm);
-                    });
-                    row.style.display = shouldShow ? '' : 'none';
-                });
-            }
-
-            // Fonction pour trier les résultats en fonction de l'option de tri sélectionnée
-            function sortResults() {
-                var sortBy = sortOptions.value;
-                var rows = Array.from(tableBody.rows);
-
-                // Fonction de comparaison en fonction de l'option de tri
-                function compareRows(a, b) {
-                    var cellA = a.cells.namedItem(sortBy).textContent;
-                    var cellB = b.cells.namedItem(sortBy).textContent;
-
-                    if (sortBy === 'dateNaissance') {
-                        // Conversion des dates pour le tri par âge
-                        var dateA = new Date(cellA);
-                        var dateB = new Date(cellB);
-                        return dateA - dateB;
-                    } else {
-                        // Tri par chaîne de caractères
-                        return cellA.localeCompare(cellB);
-                    }
-                }
-
-                // Trier et réinsérer les lignes dans le tableau
-                rows.sort(compareRows);
-                tableBody.innerHTML = '';
-                rows.forEach(function (row) {
-                    tableBody.appendChild(row);
-                });
-            }
-
-            // Écouteurs d'événements pour la recherche et le tri
-            searchInput.addEventListener('input', filterResults);
-            sortOptions.addEventListener('change', sortResults);
-        });
-    </script>
+    <script src="./js/recherche-tri.js"></script>
 </body>
 
 </html>
