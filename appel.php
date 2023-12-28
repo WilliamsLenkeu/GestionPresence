@@ -28,10 +28,8 @@
                 <div class="row mt-4 fw-normal">
                     <ul class="list-group">
                         <?php
-                            // Exemple de liste de cours (à remplacer par votre propre logique de récupération des cours depuis la base de données)
                             $cours = array("Cours 1", "Cours 2", "Cours 3", "Cours 4");
 
-                            // Parcours de la liste des cours
                             foreach ($cours as $index => $nomCours) {
                                 echo '<li class="list-group-item d-flex justify-content-between align-items-center">';
                                 echo '<span>' . ($index + 1) . '. ' . $nomCours . '</span>';
