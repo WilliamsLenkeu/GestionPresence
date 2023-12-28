@@ -22,7 +22,7 @@
                 ?>
             </div>
             <div class="col-md col-12">
-                <div class="row page-title shadow-sm">
+                <div class="row page-title shadow-lg">
                     <div class="fs-2 mt-3"> Liste D'appels - <?php echo isset($_GET['cours']) ? $_GET['cours'] : ''; ?></div>
                 </div>
                 <div class="row mt-4 fw-normal">
