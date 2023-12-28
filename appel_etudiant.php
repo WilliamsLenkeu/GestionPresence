@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tableau de Bord - Administrateur</title>
+    <title>Appel Étudiant</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="./css/style.css" type="text/css" />
     <link rel="icon" href="./image/logo.jpg" type="image/x-icon">
@@ -23,24 +23,44 @@
             </div>
             <div class="col-md col-12">
                 <div class="row page-title shadow-sm">
-                    <div class="fs-2 mt-3"> Listes D'appels </div>
+                    <div class="fs-2 mt-3"> Appel Étudiant - <?php echo isset($_GET['cours']) ? $_GET['cours'] : ''; ?></div>
                 </div>
                 <div class="row mt-4 fw-normal">
-                    <ul class="list-group">
-                        <?php
-                            // Exemple de liste de cours (à remplacer par votre propre logique de récupération des cours depuis la base de données)
-                            $cours = array("Cours 1", "Cours 2", "Cours 3", "Cours 4");
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Nom</th>
+                                <th scope="col">Matricule</th>
+                                <th scope="col">Classe</th>
+                                <th scope="col">Présent</th>
+                                <th scope="col">Absent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Assumez que $etudiants est un tableau d'étudiants avec leurs informations
+                            $etudiants = array(
+                                array("Nom1", "Matricule1", "Classe1"),
+                                array("Nom2", "Matricule2", "Classe2"),
+                                // Ajoutez d'autres étudiants ici
+                            );
 
-                            // Parcours de la liste des cours
-                            foreach ($cours as $index => $nomCours) {
-                                echo '<li class="list-group-item d-flex justify-content-between align-items-center">';
-                                echo '<span>' . ($index + 1) . '. ' . $nomCours . '</span>';
-                                echo '<a href="appel_etudiant.php?cours=' . urlencode($nomCours) . '" class="btn btn-primary btn-sm">Faire l\'appel</a>';
-                                echo '</li>';
+                            foreach ($etudiants as $index => $etudiant) {
+                                echo '<tr>';
+                                echo '<th scope="row">' . ($index + 1) . '</th>';
+                                echo '<td>' . $etudiant[0] . '</td>';
+                                echo '<td>' . $etudiant[1] . '</td>';
+                                echo '<td>' . $etudiant[2] . '</td>';
+                                echo '<td><input type="checkbox" name="present_' . $index . '" value="present"></td>';
+                                echo '<td><input type="checkbox" name="absent_' . $index . '" value="absent"></td>';
+                                echo '</tr>';
                             }
-                        ?>
-                    </ul>
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
+
             </div>
             <div class="col-md-2 border-start border-secondary">
                 <div class="card my-3">
