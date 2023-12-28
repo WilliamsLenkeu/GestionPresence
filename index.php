@@ -83,6 +83,10 @@
                 <!-- Formulaire de Connexion -->
                 <form action="process_login.php" method="post" id="loginForm">
                     <div class="mb-3">
+                        <label for="matricule" class="form-label">Matricule :</label>
+                        <input type="text" class="form-control" id="matricule" name="matricule" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="username" class="form-label">Nom d'utilisateur :</label>
                         <input type="text" class="form-control" id="username" name="username" required>
                     </div>
@@ -98,12 +102,26 @@
                 <!-- Formulaire d'Inscription -->
                 <form action="process_register.php" method="post" id="registerForm" style="display: none;">
                     <div class="mb-3">
-                        <label for="newUsername" class="form-label">Nouveau Nom d'utilisateur :</label>
+                        <label for="newMatricule" class="form-label">Matricule :</label>
+                        <input type="text" class="form-control" id="newMatricule" name="newMatricule" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newUsername" class="form-label">Nom d'utilisateur :</label>
                         <input type="text" class="form-control" id="newUsername" name="newUsername" required>
                     </div>
                     <div class="mb-3">
-                        <label for="newPassword" class="form-label">Nouveau Mot de passe :</label>
+                        <label for="newPassword" class="form-label">Mot de passe :</label>
                         <input type="password" class="form-control" id="newPassword" name="newPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="role" class="form-label">Rôle :</label>
+                        <select class="form-select" id="role" name="role" required>
+                            <option value="etudiant">Étudiant</option>
+                            <option value="enseignant">Enseignant</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="error-message" class="form-label text-danger" id="error-message"></label>
                     </div>
                     <div class="d-grid">
                         <button type="submit" class="btn btn-primary">S'Inscrire</button>
@@ -131,7 +149,13 @@
             document.getElementById('loginBtn').classList.add('active');
             document.getElementById('registerBtn').classList.remove('active');
         });
+
+        // Effacer le message d'erreur lorsqu'on clique sur le formulaire d'inscription
+        document.getElementById('registerForm').addEventListener('submit', function() {
+            document.getElementById('error-message').innerText = '';
+        });
     </script>
+
 </body>
 
 </html>
