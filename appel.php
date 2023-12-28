@@ -22,11 +22,43 @@
                 ?>
             </div>
             <div class="col-md col-12">
-                <div class="row page-title shadow-lg">
+                <div class="row page-title shadow-sm">
                     <div class="fs-2 mt-3"> Listes D'appels </div>
                 </div>
                 <div class="row mt-4 fw-normal">
-                    
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Nom</th>
+                                <th scope="col">Matricule</th>
+                                <th scope="col">Classe</th>
+                                <th scope="col">Présent</th>
+                                <th scope="col">Absent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Assumez que $etudiants est un tableau d'étudiants avec leurs informations
+                            $etudiants = array(
+                                array("Nom1", "Matricule1", "Classe1"),
+                                array("Nom2", "Matricule2", "Classe2"),
+                                // Ajoutez d'autres étudiants ici
+                            );
+
+                            foreach ($etudiants as $index => $etudiant) {
+                                echo '<tr>';
+                                echo '<th scope="row">' . ($index + 1) . '</th>';
+                                echo '<td>' . $etudiant[0] . '</td>';
+                                echo '<td>' . $etudiant[1] . '</td>';
+                                echo '<td>' . $etudiant[2] . '</td>';
+                                echo '<td><input type="checkbox" name="present_' . $index . '" value="present"></td>';
+                                echo '<td><input type="checkbox" name="absent_' . $index . '" value="absent"></td>';
+                                echo '</tr>';
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <div class="col-md-2 border-start border-secondary">
