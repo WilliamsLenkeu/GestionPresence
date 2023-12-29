@@ -4,11 +4,10 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tableau de Bord - Administrateur</title>
+    <title>Liste De Cours</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="./css/style.css" type="text/css" />
-    <link rel="stylesheet" href="./css/style.css" type="text/css" />
-    <link rel="icon" href="./image/logo.jpg" type="image/x-icon">
+    <link rel="stylesheet" href="../css/style.css" type="text/css" />
+    <link rel="icon" href="../image/logo.jpg" type="image/x-icon">
 </head>
 
 <body class="fw-bold">
@@ -18,7 +17,7 @@
         <div class="row dash-1">
             <div class="col-md-2 border-end border-secondary text-center">
                 <?php
-                include './templates/navbar.php';
+                include './navbar.php';
                 ?>
             </div>
             <div class="col-md col-12">
@@ -26,6 +25,18 @@
                     <div class="fs-2 mt-3"> Liste Des Cours </div>
                 </div>
                 <div class="row mt-4 fw-normal">
+                    <!-- Ajout de boutons pour les actions sur les cours -->
+                    <?php
+                    // Vérifier si l'utilisateur est un enseignant administrateur
+                    $isAdminEnseignant = true; // Remplacez ceci par votre logique de vérification du statut d'administrateur enseignant
+
+                    if ($isAdminEnseignant) {
+                        echo '<div class="mb-3">';
+                        echo '<a href="ajout_cours.php" class="btn btn-primary">Ajouter un Cours</a>';
+                        echo '</div>';
+                    }
+                    ?>
+
                     <!-- Tableau responsive -->
                     <div class="table-responsive">
                         <table class="table table-striped">
@@ -36,6 +47,12 @@
                                     <th>Nom du Cours</th>
                                     <th>Enseignant</th>
                                     <th>Nombre d'Élèves</th>
+                                    <?php
+                                    // Afficher les colonnes d'action si l'utilisateur est un enseignant administrateur
+                                    if ($isAdminEnseignant) {
+                                        echo '<th>Actions</th>';
+                                    }
+                                    ?>
                                 </tr>
                             </thead>
                             <tbody>
@@ -56,6 +73,14 @@
                                     echo '<td>' . $coursInfo[1] . '</td>';
                                     echo '<td>' . $coursInfo[2] . '</td>';
                                     echo '<td>' . $coursInfo[3] . '</td>';
+                                    // Ajouter des boutons d'action si l'utilisateur est un enseignant administrateur
+                                    if ($isAdminEnseignant) {
+                                        echo '<td>';
+                                        echo '<a href="modifier_cours.php?id=' . $index . '" class="btn btn-warning btn-sm">Modifier</a>';
+                                        echo ' ';
+                                        echo '<a href="supprimer_cours.php?id=' . $index . '" class="btn btn-danger btn-sm">Supprimer</a>';
+                                        echo '</td>';
+                                    }
                                     echo '</tr>';
                                 }
                                 ?>
@@ -68,7 +93,7 @@
             <!-- Colonne de droite pour les informations de l'utilisateur -->
             <div class="col-md-2 border-start border-secondary">
                 <?php
-                    include './templates/user-card.php';
+                include '../templates/user-card.php';
                 ?>
             </div>
         </div>
