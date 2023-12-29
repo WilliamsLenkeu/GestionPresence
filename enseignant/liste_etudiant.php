@@ -1,3 +1,15 @@
+<?php
+// Démarrez la session pour accéder aux variables de session
+session_start();
+
+// Vérifiez si le matricule est présent dans la session
+if (!isset($_SESSION['matricule'])) {
+    // Redirige vers la page index.php du dossier parent
+    header('Location: ../index.php');
+    exit;
+}
+
+?>
 <!DOCTYPE html>
 <html lang="fr">
 
