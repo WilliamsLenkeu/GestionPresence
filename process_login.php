@@ -69,6 +69,8 @@ if ($stmt->num_rows > 0) {
 } else {
     // Matricule non trouvé, afficher une alerte d'erreur avec Bootstrap
     echo '<script>alert("Matricule non trouvé."); window.location.replace("index.php");</script>';
+    header('Location: ./logout.php');
+    exit;
 }
 
 // Fermer la connexion

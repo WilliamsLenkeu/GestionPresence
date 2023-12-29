@@ -29,7 +29,7 @@ if (isset($_SESSION['matricule'])) {
         $stmt->bind_result($storedMatricule, $storedUsername, $nom, $prenom, $dateNaissance, $role);
         $stmt->fetch();
 ?>
-        <div class="card my-3 shadow-sm" style="background-color: c4c4c4;">
+        <div class="card my-3 shadow-sm">
             <div class="card-header">
                 <h5 class="card-title mb-0">Informations Utilisateur</h5>
             </div>
@@ -74,7 +74,7 @@ if (isset($_SESSION['matricule'])) {
     $conn->close();
 } else {
     // Rediriger si le matricule n'est pas présent dans la session
-    header('Location: index.php');
+    header('Location:   ./logout.php');
     exit;
 }
 ?>

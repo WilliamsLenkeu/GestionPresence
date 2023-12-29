@@ -5,7 +5,7 @@ session_start();
 // Vérifiez si le matricule est présent dans la session
 if (!isset($_SESSION['matricule'])) {
     // Redirige vers la page index.php du dossier parent
-    header('Location: ../index.php');
+    header('Location: ../logout.php');
     exit;
 }
 

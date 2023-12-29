@@ -2,12 +2,40 @@
 // Démarrez la session pour accéder aux variables de session
 session_start();
 
+// Inclure le fichier de connexion à la base de données
+include '../connexion.php';
+
 // Vérifiez si le matricule est présent dans la session
 if (!isset($_SESSION['matricule'])) {
     // Redirige vers la page index.php du dossier parent
-    header('Location: ../index.php');
+    header('Location: ../logout.php');
     exit;
 }
+
+// Vérifier si l'utilisateur est à la fois enseignant et administrateur
+$estEnseignant = isset($_SESSION['role']) && $_SESSION['role'] == 'enseignant';
+$estAdministrateur = isset($_SESSION['administrateur']) && $_SESSION['administrateur'] == 1;
+
+if (!($estEnseignant || $estAdministrateur)) {
+    // Rediriger vers une page d'erreur ou restreindre l'accès si l'utilisateur n'est pas enseignant administrateur
+    header('Location: ../erreur.php');
+    exit;
+}
+
+// Fonction pour afficher les boutons d'ajout, de modification et de suppression
+function afficherBoutonsActions()
+{
+    echo '<div class="mb-3">';
+    echo '<a href="ajouter_etudiant.php" class="btn btn-success">Ajouter un étudiant</a>';
+    echo '</div>';
+}
+
+// Requête SQL pour récupérer la liste des étudiants depuis la base de données
+$sql = "SELECT utilisateur_matricule, nom, classe, date_naissance FROM profil";
+$stmt = $pdo->prepare($sql);
+$stmt->execute();
+$etudiants = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
 
 ?>
 <!DOCTYPE html>
@@ -32,96 +60,61 @@ if (!isset($_SESSION['matricule'])) {
                     include './navbar.php';
                 ?>
             </div>
-            <div class="col-md col-12">
-                <div class="row page-title shadow-lg">
-                    <div class="fs-2 mt-3"> Etudiants </div>
+            <div class="row mt-4 fw-normal">
+                <?php
+                // Afficher les boutons d'actions pour un enseignant administrateur
+                // if ($estAdministrateur) {
+                //     afficherBoutonsActions();
+                // }
+                ?>
+                <div class="mb-3 form-inline">
+                    <label for="sortOptions" class="form-label mr-2">Trier par :</label>
+                    <select class="form-select" id="sortOptions">
+                        <option value="classe">Classe</option>
+                        <option value="age">Âge</option>
+                    </select>
                 </div>
-                <div class="row mt-4 fw-normal">
-                    <div class="mb-3">
-                        <!-- Barre de recherche -->
-                        <input type="text" class="form-control" id="searchInput" placeholder="Rechercher un étudiant">
-                    </div>
 
-                    <!-- Options de tri -->
-                    <div class="mb-3 form-inline">
-                        <label for="sortOptions" class="form-label mr-2">Trier par :</label>
-                        <select class="form-select" id="sortOptions">
-                            <option value="classe">Classe</option>
-                            <option value="age">Âge</option>
-                        </select>
-                    </div>
-
-                    <!-- Tableau responsive -->
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Matricule</th>
-                                    <th>Nom</th>
-                                    <th>Classe</th>
-                                    <th>Date de Naissance</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+                <!-- Tableau responsive -->
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Matricule</th>
+                                <th>Nom</th>
+                                <th>Classe</th>
+                                <th>Date de Naissance</th>
                                 <?php
-                                // Exemple de liste d'étudiants (à remplacer par votre propre logique de récupération des étudiants depuis la base de données)
-                                $etudiants = array(
-                                    array("001", "John Doe", "Classe A", "1995-05-15"),
-                                    array("002", "Jane Doe", "Classe B", "1998-02-20"),
-                                    array("003", "Alice Smith", "Classe A", "1997-09-10"),
-                                    array("004", "Bob Johnson", "Classe A", "1996-12-25"),
-                                    array("005", "Charlie Brown", "Classe A", "1999-07-18"),
-                                    array("006", "Eva Green", "Classe A", "1994-03-05"),
-                                    array("007", "Mike White", "Classe B", "1996-08-30"),
-                                    array("008", "Sophie Miller", "Classe B", "1998-04-12"),
-                                    array("009", "Daniel Davis", "Classe B", "1997-11-22"),
-                                    array("010", "Laura Wilson", "Classe C", "1995-06-08"),
-                                    array("011", "Tom Parker", "Classe C", "1999-01-14"),
-                                    array("012", "Emma Lee", "Classe A", "1998-09-03"),
-                                    array("013", "William Brown", "Classe B", "1997-04-17"),
-                                    array("014", "Olivia Smith", "Classe A", "1996-10-28"),
-                                    array("015", "Liam Davis", "Classe C", "1998-07-12"),
-                                    array("016", "Ava Johnson", "Classe A", "1999-02-22"),
-                                    array("017", "Mia Wilson", "Classe B", "1995-11-14"),
-                                    array("018", "Noah Green", "Classe C", "1994-04-30"),
-                                    array("019", "Sophia White", "Classe A", "1996-12-05"),
-                                    array("020", "Ethan Miller", "Classe C", "1997-08-19")
-                                );
-                                
-                                
-
-                                // Fonction pour trier les étudiants par classe
-                                function sortByClasse($a, $b)
-                                {
-                                    return strcmp($a[2], $b[2]);
-                                }
-
-                                // Fonction pour trier les étudiants par âge
-                                function sortByAge($a, $b)
-                                {
-                                    $dateA = new DateTime($a[3]);
-                                    $dateB = new DateTime($b[3]);
-                                    return $dateA <=> $dateB;
-                                }
-
-                                // Tri par défaut (par classe)
-                                usort($etudiants, 'sortByClasse');
-
-                                // Parcours de la liste des étudiants
-                                foreach ($etudiants as $index => $etudiant) {
-                                    echo '<tr>';
-                                    echo '<td>' . ($index + 1) . '</td>';
-                                    echo '<td>' . $etudiant[0] . '</td>';
-                                    echo '<td>' . $etudiant[1] . '</td>';
-                                    echo '<td>' . $etudiant[2] . '</td>';
-                                    echo '<td>' . $etudiant[3] . '</td>';
-                                    echo '</tr>';
+                                // Ajouter une colonne d'actions si l'utilisateur est enseignant administrateur
+                                if ($estAdministrateur) {
+                                    echo '<th>Actions</th>';
                                 }
                                 ?>
-                            </tbody>
-                        </table>
-                    </div>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php
+                            // Afficher la liste des étudiants
+                            foreach ($etudiants as $index => $etudiant) {
+                                echo '<tr>';
+                                echo '<td>' . ($index + 1) . '</td>';
+                                echo '<td>' . $etudiant['matricule'] . '</td>';
+                                echo '<td>' . $etudiant['nom'] . '</td>';
+                                echo '<td>' . $etudiant['classe'] . '</td>';
+                                echo '<td>' . $etudiant['date_naissance'] . '</td>';
+                                if ($estAdministrateur) {
+                                    // Ajouter des boutons d'actions pour un enseignant administrateur
+                                    echo '<td>';
+                                    echo '<a href="modifier_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-warning">Modifier</a>';
+                                    echo '<a href="supprimer_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-danger" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer cet étudiant ?\')">Supprimer</a>';
+                                    echo '</td>';
+                                }
+                                echo '</tr>';
+                            }
+                            ?>
+                        </tbody>
+                    </table>
                 </div>
             </div>
             <!-- Colonne de droite pour les informations de l'utilisateur -->
