@@ -39,8 +39,59 @@ if (isset($_SESSION['matricule'])) {
                 <p class="card-text">Matricule: <?php echo $storedMatricule; ?></p>
                 <p class="card-text">Nom: <?php echo $nom; ?></p>
                 <p class="card-text">Prénom: <?php echo $prenom; ?></p>
-                <!-- <p class="card-text">Date de Naissance: <?php echo $dateNaissance; ?></p> -->
+                <p class="card-text">Date de Naissance: <?php echo $dateNaissance; ?></p>
                 <p class="card-text">Rôle: <?php echo $role; ?></p>
+
+                <?php
+                // Vérifier le rôle de l'utilisateur
+                if ($role === 'enseignant') {
+                    // Si l'utilisateur est un enseignant, afficher les informations de la table information_enseignant
+                    $sql_enseignant = "SELECT specialite, bureau FROM information_enseignant WHERE utilisateur_matricule = ?";
+                    $stmt_enseignant = $conn->prepare($sql_enseignant);
+                    $stmt_enseignant->bind_param('s', $matricule);
+                    $stmt_enseignant->execute();
+                    $stmt_enseignant->store_result();
+
+                    if ($stmt_enseignant->num_rows > 0) {
+                        $stmt_enseignant->bind_result($specialite, $bureau);
+                        $stmt_enseignant->fetch();
+                ?>
+                        <p class="card-text">Spécialité: <?php echo $specialite; ?></p>
+                        <p class="card-text">Bureau: <?php echo $bureau; ?></p>
+                <?php
+                    }
+                    $stmt_enseignant->close();
+                } else {
+                    // Si l'utilisateur est un étudiant, afficher les informations de la table information_etudiant
+                    $sql_etudiant = "SELECT filiere_id FROM information_etudiant WHERE utilisateur_matricule = ?";
+                    $stmt_etudiant = $conn->prepare($sql_etudiant);
+                    $stmt_etudiant->bind_param('s', $matricule);
+                    $stmt_etudiant->execute();
+                    $stmt_etudiant->store_result();
+
+                    if ($stmt_etudiant->num_rows > 0) {
+                        $stmt_etudiant->bind_result($filiere_id);
+                        $stmt_etudiant->fetch();
+
+                        // Récupérer le nom de la filière
+                        $sql_filiere = "SELECT nom FROM filiere WHERE id = ?";
+                        $stmt_filiere = $conn->prepare($sql_filiere);
+                        $stmt_filiere->bind_param('s', $filiere_id);
+                        $stmt_filiere->execute();
+                        $stmt_filiere->store_result();
+
+                        if ($stmt_filiere->num_rows > 0) {
+                            $stmt_filiere->bind_result($nom_filiere);
+                            $stmt_filiere->fetch();
+                ?>
+                            <p class="card-text">Filière: <?php echo $nom_filiere; ?></p>
+                <?php
+                        }
+                        $stmt_filiere->close();
+                    }
+                    $stmt_etudiant->close();
+                }
+                ?>
                 <!-- Ajoutez d'autres informations de l'utilisateur ici -->
             </div>
             <div class="card-footer bg-transparent border-top-0">
@@ -74,7 +125,7 @@ if (isset($_SESSION['matricule'])) {
     $conn->close();
 } else {
     // Rediriger si le matricule n'est pas présent dans la session
-    header('Location:   ./logout.php');
+    header('Location: ./logout.php');
     exit;
 }
 ?>

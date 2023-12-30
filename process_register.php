@@ -1,72 +1,70 @@
 <?php
-// Connexion à la base de données (à adapter selon votre configuration)
-include './connexion.php';
+// Inclusion du fichier de connexion à la base de données
+require_once("connexion.php");
 
-$conn = new mysqli($servername, $username, $password, $dbname);
+// Validation du formulaire
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Récupération des données du formulaire
+    $newMatricule = $_POST["newMatricule"];
+    $newUsername = $_POST["newUsername"];
+    $newPassword = $_POST["newPassword"];
+    $role = $_POST["role"];
 
-// Vérifier la connexion
-if ($conn->connect_error) {
-    die("La connexion a échoué : " . $conn->connect_error);
-}
+    // Vérification de l'existence du matricule
+    $checkMatriculeQuery = "SELECT * FROM utilisateur WHERE matricule = :matricule";
+    $checkMatriculeStatement = $pdo->prepare($checkMatriculeQuery);
+    $checkMatriculeStatement->bindParam(":matricule", $newMatricule, PDO::PARAM_INT);
+    $checkMatriculeStatement->execute();
 
-// Récupérer les données du formulaire
-$newMatricule = $_POST['newMatricule'];
-$newUsername = $_POST['newUsername'];
-$newPassword = $_POST['newPassword'];
-$selectedRole = $_POST['role'];
-
-// Vérifier si le matricule existe déjà
-$sqlCheckMatricule = "SELECT COUNT(*) AS matriculeCount FROM utilisateur WHERE matricule = '$newMatricule'";
-$resultCheckMatricule = $conn->query($sqlCheckMatricule);
-
-if ($resultCheckMatricule && $resultCheckMatricule->num_rows > 0) {
-    $row = $resultCheckMatricule->fetch_assoc();
-    $matriculeCount = $row['matriculeCount'];
-
-    if ($matriculeCount > 0) {
-        // Le matricule existe déjà, afficher un message d'erreur ou rediriger vers le formulaire d'inscription avec un message d'erreur
-        echo "Erreur: Le matricule existe déjà.";
-        exit;
+    if ($checkMatriculeStatement->rowCount() > 0) {
+        // Le matricule existe déjà, affichage d'une erreur
+        echo "Erreur : Le matricule existe déjà.";
+        exit();
     }
-}
 
-// Hasher le mot de passe (à adapter selon vos besoins)
-$hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    // Hachage du mot de passe
+    $hashedPassword = password_hash($newPassword, PASSWORD_DEFAULT);
 
-// Vérifier s'il y a un enseignant administrateur dans la table utilisateur
-$sqlCheckAdminEnseignant = "SELECT COUNT(*) AS adminEnseignantCount FROM utilisateur WHERE role = 'enseignant' AND administrateur = 1";
-$resultCheckAdminEnseignant = $conn->query($sqlCheckAdminEnseignant);
+    // Vérification de l'existence d'un enseignant administrateur
+    $countAdminQuery = "SELECT COUNT(*) FROM utilisateur WHERE role = 'enseignant' AND administrateur = 1";
+    $countAdminStatement = $pdo->query($countAdminQuery);
+    $countAdmin = $countAdminStatement->fetchColumn();
 
-if ($resultCheckAdminEnseignant && $resultCheckAdminEnseignant->num_rows > 0) {
-    $rowAdminEnseignant = $resultCheckAdminEnseignant->fetch_assoc();
-    $adminEnseignantCount = $rowAdminEnseignant['adminEnseignantCount'];
+    // Conditions basées sur le rôle et l'existence de l'enseignant administrateur
+    if ($role == 'enseignant' && $countAdmin == 0) {
+        $administrateur = 1; // L'utilisateur est configuré en tant qu'administrateur
+    } elseif ($role == 'etudiant') {
+        // Vérification de l'existence d'au moins un enseignant
+        $checkEnseignantQuery = "SELECT COUNT(*) FROM utilisateur WHERE role = 'enseignant'";
+        $checkEnseignantStatement = $pdo->query($checkEnseignantQuery);
+        $countEnseignant = $checkEnseignantStatement->fetchColumn();
 
-    if ($adminEnseignantCount > 0 || $selectedRole !== 'etudiant') {
-        // Il y a déjà un enseignant administrateur ou l'utilisateur n'est pas un étudiant, utiliser le rôle choisi par l'utilisateur
-        $role = $selectedRole;
-        $administrateur = 0; // On suppose que l'utilisateur n'est pas administrateur
+        if ($countEnseignant == 0) {
+            // Aucun enseignant n'est présent, affichage d'une erreur
+            echo '<script>alert("Aucun enseignant existant."); window.location.replace("index.php");</script>';
+            exit();
+        }
+
+        $administrateur = 0; // L'utilisateur n'est pas administrateur
     } else {
-        // Aucun enseignant n'est trouvé, et l'utilisateur veut s'inscrire en tant qu'étudiant
-        echo "Erreur: Aucun enseignant n'est disponible. L'inscription en tant qu'étudiant n'est pas autorisée.";
-        exit;
+        $administrateur = 0; // L'utilisateur n'est pas administrateur
     }
-} else {
-    // En cas d'erreur, afficher un message d'erreur
-    echo "Erreur lors de la vérification de l'enseignant administrateur.";
-    exit;
+
+    // Insertion des données dans la table utilisateur
+    $insertUserQuery = "INSERT INTO utilisateur (matricule, username, password, role, administrateur) VALUES (:matricule, :username, :password, :role, :administrateur)";
+    $insertUserStatement = $pdo->prepare($insertUserQuery);
+    $insertUserStatement->bindParam(":matricule", $newMatricule, PDO::PARAM_INT);
+    $insertUserStatement->bindParam(":username", $newUsername, PDO::PARAM_STR);
+    $insertUserStatement->bindParam(":password", $hashedPassword, PDO::PARAM_STR);
+    $insertUserStatement->bindParam(":role", $role, PDO::PARAM_STR);
+    $insertUserStatement->bindParam(":administrateur", $administrateur, PDO::PARAM_INT);
+    $insertUserStatement->execute();
+
+    // Redirection vers le formulaire de connexion
+    header("Location: index.php");
+    exit();
 }
 
-// Insérer les données dans la table utilisateur
-$sql = "INSERT INTO utilisateur (matricule, username, password, role, administrateur) VALUES ('$newMatricule', '$newUsername', '$hashedPassword', '$role', '$administrateur')";
-
-if ($conn->query($sql) === TRUE) {
-    // Rediriger vers le formulaire de connexion
-    header('Location: index.php');
-    exit;
-} else {
-    echo "Erreur: " . $conn->error;
-}
-
-// Fermer la connexion
-$conn->close();
+// Fermeture de la connexion
+$pdo = null;
 ?>

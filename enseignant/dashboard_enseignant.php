@@ -9,8 +9,24 @@ if (!isset($_SESSION['matricule'])) {
     exit;
 }
 
-?>
+// Vérifier si l'enseignant a un profil
+include '../connexion.php';
 
+$matricule = $_SESSION['matricule'];
+
+$sql = "SELECT * FROM profil WHERE utilisateur_matricule = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $matricule);
+$stmt->execute();
+$stmt->store_result();
+
+if ($stmt->num_rows == 0) {
+    // L'enseignant n'a pas de profil, rediriger vers la page de profil
+    header('Location: remplir_profil_enseignant.php');
+    exit;
+}
+
+?>
 
 <!doctype html>
 <html lang="fr">

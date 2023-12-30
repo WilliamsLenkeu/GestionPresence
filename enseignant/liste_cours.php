@@ -2,13 +2,56 @@
 // Démarrez la session pour accéder aux variables de session
 session_start();
 
-// Vérifiez si le matricule est présent dans la session
-if (!isset($_SESSION['matricule'])) {
-    // Redirige vers la page index.php du dossier parent
-    header('Location: ../logout.php');
+include '../connexion.php';
+
+// Vérifier la connexion
+if ($conn->connect_error) {
+    die("La connexion à la base de données avec MySQLi a échoué : " . $conn->connect_error);
+}
+
+// Utilisation d'une requête préparée pour éviter les attaques par injection SQL
+$sql = "SELECT administrateur FROM utilisateur WHERE matricule = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('s', $matricule);
+$stmt->execute();
+$stmt->store_result();
+
+// Vérifier si l'utilisateur est administrateur
+$isAdmin = false;
+if ($stmt->num_rows > 0) {
+    $stmt->bind_result($adminStatus);
+    $stmt->fetch();
+    $isAdmin = $adminStatus == 1;
+}
+
+// Vérifier si l'utilisateur est un enseignant administrateur
+$estEnseignant = isset($_SESSION['role']) && $_SESSION['role'] == 'enseignant';
+$isAdminEnseignant = $estEnseignant && $isAdmin;
+
+// Si l'utilisateur n'est pas enseignant administrateur, redirige vers une page d'erreur ou restreint l'accès
+if (!($isAdminEnseignant || $estEnseignant)) {
+    header('Location: ../erreur.php');
     exit;
 }
 
+// Fonction pour afficher les boutons d'ajout, de modification et de suppression
+function afficherBoutonsActions()
+{
+    echo '<div class="mb-3">';
+    echo '<a href="ajout_cours.php" class="btn btn-primary">Ajouter un Cours</a>';
+    echo '</div>';
+}
+
+// Requête SQL pour récupérer la liste des cours affectés à l'enseignant administrateur
+$sql = "SELECT c.id, c.nom, c.description, c.heures_attribuees FROM cours c
+        INNER JOIN attribution_cours ac ON c.id = ac.cours_id
+        INNER JOIN utilisateur u ON ac.utilisateur_matricule = u.matricule
+        WHERE u.matricule = :matricule";
+
+$stmt = $pdo->prepare($sql);
+$stmt->bindParam(':matricule', $_SESSION['matricule']);
+$stmt->execute();
+$cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="fr">
@@ -39,61 +82,39 @@ if (!isset($_SESSION['matricule'])) {
                 <div class="row mt-4 fw-normal">
                     <!-- Ajout de boutons pour les actions sur les cours -->
                     <?php
-                    // Vérifier si l'utilisateur est un enseignant administrateur
-                    $isAdminEnseignant = true; // Remplacez ceci par votre logique de vérification du statut d'administrateur enseignant
-
+                    // Afficher les boutons d'actions pour un enseignant administrateur
                     if ($isAdminEnseignant) {
-                        echo '<div class="mb-3">';
-                        echo '<a href="ajout_cours.php" class="btn btn-primary">Ajouter un Cours</a>';
-                        echo '</div>';
+                        afficherBoutonsActions();
                     }
                     ?>
-
-                    <!-- Tableau responsive -->
                     <div class="table-responsive">
                         <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Code du Cours</th>
-                                    <th>Nom du Cours</th>
-                                    <th>Enseignant</th>
-                                    <th>Nombre d'Élèves</th>
-                                    <?php
-                                    // Afficher les colonnes d'action si l'utilisateur est un enseignant administrateur
-                                    if ($isAdminEnseignant) {
-                                        echo '<th>Actions</th>';
-                                    }
-                                    ?>
-                                </tr>
-                            </thead>
+                            <!-- ... (en-tête du tableau) -->
                             <tbody>
                                 <?php
-                                // Exemple de liste de cours (à remplacer par votre propre logique de récupération des cours depuis la base de données)
-                                $cours = array(
-                                    array("ICT201", "Informatique Avancée", "Professeur A", 30),
-                                    array("ICT202", "Base de Données", "Professeur B", 25),
-                                    array("ICT203", "Réseaux Informatiques", "Professeur C", 20),
-                                    // Ajoutez d'autres cours ici
-                                );
-
-                                // Parcours de la liste des cours
-                                foreach ($cours as $index => $coursInfo) {
-                                    echo '<tr>';
-                                    echo '<td>' . ($index + 1) . '</td>';
-                                    echo '<td>' . $coursInfo[0] . '</td>';
-                                    echo '<td>' . $coursInfo[1] . '</td>';
-                                    echo '<td>' . $coursInfo[2] . '</td>';
-                                    echo '<td>' . $coursInfo[3] . '</td>';
-                                    // Ajouter des boutons d'action si l'utilisateur est un enseignant administrateur
-                                    if ($isAdminEnseignant) {
-                                        echo '<td>';
-                                        echo '<a href="modifier_cours.php?id=' . $index . '" class="btn btn-warning btn-sm">Modifier</a>';
-                                        echo ' ';
-                                        echo '<a href="supprimer_cours.php?id=' . $index . '" class="btn btn-danger btn-sm">Supprimer</a>';
-                                        echo '</td>';
+                                // Afficher la liste des cours
+                                if (empty($cours)) {
+                                    // Aucun cours trouvé dans la base de données
+                                    echo '<ul class="list-group" >';
+                                    echo '<li class="list-group-item text-center">Aucun cours existant.</li>';
+                                    echo '</ul>';
+                                } else {
+                                    foreach ($cours as $index => $coursInfo) {
+                                        echo '<tr>';
+                                        echo '<td>' . ($index + 1) . '</td>';
+                                        echo '<td>' . $coursInfo['nom'] . '</td>';
+                                        echo '<td>' . $coursInfo['description'] . '</td>';
+                                        echo '<td>' . $coursInfo['heures_attribuees'] . '</td>';
+                                        // Ajouter des boutons d'action pour un enseignant administrateur
+                                        if($isAdminEnseignant){
+                                            echo '<td>';
+                                            echo '<a href="modifier_cours.php?id=' . $coursInfo['id'] . '" class="btn btn-warning btn-sm">Modifier</a>';
+                                            echo ' ';
+                                            echo '<a href="supprimer_cours.php?id=' . $coursInfo['id'] . '" class="btn btn-danger btn-sm">Supprimer</a>';
+                                            echo '</td>';
+                                            echo '</tr>';
+                                        }
                                     }
-                                    echo '</tr>';
                                 }
                                 ?>
                             </tbody>

@@ -1,6 +1,7 @@
 -- Table pour stocker les utilisateurs (étudiants, enseignants, administrateurs)
 CREATE TABLE utilisateur ( 
-	matricule INT NOT NULL, username VARCHAR(255) NOT NULL, 
+	matricule INT NOT NULL, 
+	username VARCHAR(255) NOT NULL, 
 	password VARCHAR(255) NOT NULL, 
 	role ENUM('etudiant', 'enseignant') NOT NULL, 
 	administrateur BOOLEAN NOT NULL DEFAULT 0, 
@@ -28,12 +29,12 @@ CREATE TABLE profil (
   FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule)
 );
 
--- Table pour gérer les cours
-CREATE TABLE cours (
-  id INT NOT NULL AUTO_INCREMENT,
-  nom VARCHAR(255) NOT NULL,
-  description TEXT,
-  PRIMARY KEY (id)
+CREATE TABLE cours ( 
+	id INT NOT NULL AUTO_INCREMENT, 
+	nom VARCHAR(255) NOT NULL, 
+	description TEXT, 
+	heures_attribuees INT NOT NULL, 
+	PRIMARY KEY (id) 
 );
 
 -- Table pour attribuer des étudiants et enseignants à des cours spécifiques
@@ -80,19 +81,6 @@ CREATE TABLE justificatif (
   PRIMARY KEY (id),
   FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule),
   FOREIGN KEY (enregistrement_assiduite_id) REFERENCES enregistrement_assiduite (id)
-);
-
--- Table pour enregistrer les retards des étudiants
-CREATE TABLE retard (
-  id INT NOT NULL AUTO_INCREMENT,
-  utilisateur_matricule INT NOT NULL, -- Modification : Utilisation du matricule comme clé étrangère
-  cours_id INT NOT NULL,
-  session_academique_id INT NOT NULL,
-  date DATE NOT NULL,
-  PRIMARY KEY (id),
-  FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule),
-  FOREIGN KEY (cours_id) REFERENCES cours (id),
-  FOREIGN KEY (session_academique_id) REFERENCES session_academique (id)
 );
 
 -- Table pour gérer les notifications
