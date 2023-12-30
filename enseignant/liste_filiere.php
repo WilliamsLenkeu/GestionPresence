@@ -28,20 +28,15 @@ if ($stmt->num_rows > 0) {
 function afficherBoutonsActions()
 {
     echo '<div class="mb-3">';
-    echo '<a href="ajout_cours.php" class="btn btn-success">Ajouter un Cours</a>';
+    echo '<a href="ajout_filiere.php" class="btn btn-success">Ajouter une Filière</a>';
     echo '</div>';
 }
 
-// Requête SQL pour récupérer la liste des cours affectés à l'enseignant administrateur
-$sql = "SELECT c.id, c.nom, c.description, c.heures_attribuees FROM cours c
-        INNER JOIN attribution_cours ac ON c.id = ac.cours_id
-        INNER JOIN utilisateur u ON ac.utilisateur_matricule = u.matricule
-        WHERE u.matricule = :matricule";
-
+// Requête SQL pour récupérer la liste des filières
+$sql = "SELECT id, nom, description FROM filiere";
 $stmt = $pdo->prepare($sql);
-$stmt->bindParam(':matricule', $_SESSION['matricule']);
 $stmt->execute();
-$cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$filieres = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="fr">
@@ -49,7 +44,7 @@ $cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Liste De Cours</title>
+    <title>Liste Des Filieres</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css" type="text/css" />
     <link rel="icon" href="../image/logo.jpg" type="image/x-icon">
@@ -67,11 +62,12 @@ $cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
             <div class="col-md col-12">
                 <div class="row page-title shadow-lg">
-                    <div class="fs-2 mt-3"> Liste Des Cours </div>
+                    <div class="fs-2 mt-3"> Liste Des Filieres </div>
                 </div>
                 <div class="row mt-4 fw-normal">
+                    <!-- Ajout de boutons pour les actions sur les filières -->
                     <?php
-                    // Afficher les boutons d'actions pour un enseignant administrateur
+                    // Afficher les boutons d'actions pour un administrateur
                     if ($isAdmin) {
                         afficherBoutonsActions();
                     }
@@ -81,28 +77,25 @@ $cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <!-- ... (en-tête du tableau) -->
                             <tbody>
                                 <?php
-                                // Afficher la liste des cours
-                                if (empty($cours)) {
-                                    // Aucun cours trouvé dans la base de données
+                                // Afficher la liste des filières
+                                if (empty($filieres)) {
+                                    // Aucune filière trouvée dans la base de données
                                     echo '<ul class="list-group" >';
-                                    echo '<li class="list-group-item text-center">Aucun cours existant.</li>';
+                                    echo '<li class="list-group-item text-center">Aucune filière existante.</li>';
                                     echo '</ul>';
                                 } else {
-                                    foreach ($cours as $index => $coursInfo) {
+                                    foreach ($filieres as $index => $filiereInfo) {
                                         echo '<tr>';
                                         echo '<td>' . ($index + 1) . '</td>';
-                                        echo '<td>' . $coursInfo['nom'] . '</td>';
-                                        echo '<td>' . $coursInfo['description'] . '</td>';
-                                        echo '<td>' . $coursInfo['heures_attribuees'] . '</td>';
-                                        // Ajouter des boutons d'action pour un enseignant administrateur
-                                        if($isAdmin){
-                                            echo '<td>';
-                                            echo '<a href="modifier_cours.php?id=' . $coursInfo['id'] . '" class="btn btn-warning btn-sm">Modifier</a>';
-                                            echo ' ';
-                                            echo '<a href="supprimer_cours.php?id=' . $coursInfo['id'] . '" class="btn btn-danger btn-sm">Supprimer</a>';
-                                            echo '</td>';
-                                            echo '</tr>';
-                                        }
+                                        echo '<td>' . $filiereInfo['nom'] . '</td>';
+                                        echo '<td>' . $filiereInfo['description'] . '</td>';
+                                        // Ajouter des boutons d'action pour un administrateur
+                                        echo '<td>';
+                                        echo '<a href="modifier_filiere.php?id=' . $filiereInfo['id'] . '" class="btn btn-warning btn-sm">Modifier</a>';
+                                        echo ' ';
+                                        echo '<a href="supprimer_filiere.php?id=' . $filiereInfo['id'] . '" class="btn btn-danger btn-sm">Supprimer</a>';
+                                        echo '</td>';
+                                        echo '</tr>';
                                     }
                                 }
                                 ?>

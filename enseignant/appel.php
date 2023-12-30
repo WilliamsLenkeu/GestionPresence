@@ -54,19 +54,19 @@ $cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <!-- Formulaire de recherche en temps réel -->
-                <form class="row mt-4 fw-normal">
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control shadow-sm" placeholder="Rechercher un cours" name="search" id="searchInput">
-                    </div>
-                </form>
 
                 <!-- Liste des cours dynamique -->
                 <ul class="list-group" id="coursList">
                     <?php
                     if (empty($cours)) {
                         // Aucun cours trouvé dans la base de données
-                        echo '<li class="list-group-item text-center">Aucun cours existant.</li>';
+                        echo '<li class="list-group-item text-center my-3">Aucun cours existant.</li>';
                     } else {
+                        echo '<form class="row mt-4 fw-normal">';
+                        echo '<div class="input-group mb-3">';
+                        echo '<input type="text" class="form-control shadow-sm" placeholder="Rechercher un cours" name="search" id="searchInput">';
+                        echo '</div>';
+                        echo '</form>';
                         // Afficher la liste des cours
                         foreach ($cours as $index => $c) {
                             echo '<li class="list-group-item d-flex justify-content-between align-items-center">';

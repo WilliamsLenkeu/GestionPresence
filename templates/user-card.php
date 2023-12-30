@@ -97,10 +97,10 @@ if (isset($_SESSION['matricule'])) {
             <div class="card-footer bg-transparent border-top-0">
                 <div class="container ">
                     <div class="row">
-                        <div class="col-6">
-                            <!-- Bouton pour accéder au profil -->
-                            <a href="#" class="btn btn-light btn-sm w-100 shadow-sm border-1">Profil</a>
-                        </div>
+                        <!-- <div class="col-6">
+                            <a href="#" class="btn btn-primary btn-sm w-100 shadow-sm border-1">Profil</a>
+                        </div> -->
+                        <div class="col-3"></div>
                         <div class="col-6">
                             <!-- Bouton de déconnexion -->
                             <a href="../logout.php" class="btn btn-danger btn-sm w-100 shadow- border-danger">
@@ -110,6 +110,7 @@ if (isset($_SESSION['matricule'])) {
                                 </svg>
                             </a>
                         </div>
+                        <div class="col-3"></div>
                     </div>
                 </div>
             </div>

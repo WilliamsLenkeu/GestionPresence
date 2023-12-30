@@ -56,84 +56,40 @@ if ($stmt->num_rows == 0) {
                     <div class="fs-2 mt-3"> Tableau de Bord </div>
                 </div>
                 <div class="row mt-4 fw-normal">
-                    <!-- Carte des étudiants avec le plus d'absences -->
-                    <div class="col-md-6 my-2">
-                        <div class="card">
-                            <div class="card-header">
-                                Étudiants avec le plus d'absences
-                            </div>
-                            <div class="card-body">
-                                <!-- Afficher la liste des étudiants avec le plus d'absences ici -->
-                            </div>
-                        </div>
-                    </div>
+                    <?php
+                    // Liste des tables à afficher
+                    $tables = array("utilisateur", "session", "cours", "session_academique", "justificatif", "notification", "filiere");
 
-                    <!-- Carte des notifications -->
-                    <div class="col-md-6 my-2">
-                        <div class="card">
-                            <div class="card-header">
-                                Notifications
-                            </div>
-                            <div class="card-body">
-                                <!-- Afficher la liste des notifications ici -->
-                            </div>
-                        </div>
-                    </div>
+                    // Parcourir les tables et afficher un résumé sous forme de carte pour chaque table
+                    foreach ($tables as $table) {
+                        $sql = "SELECT * FROM $table";
+                        $result = $conn->query($sql);
 
-                    <div class="col-md-6 my-2">
-                        <div class="card">
-                            <div class="card-header">
-                                Notifications
-                            </div>
-                            <div class="card-body">
-                                <!-- Afficher la liste des notifications ici -->
-                            </div>
-                        </div>
-                    </div>
+                        echo '<div class="col-md-4 mb-4">';
+                        echo '<div class="card">';
+                        echo '<div class="card-body">';
+                        echo '<h5 class="card-title">' . ucfirst($table) . '</h5>';
 
-                    <div class="col-md-6 my-2">
-                        <div class="card">
-                            <div class="card-header">
-                                Notifications
-                            </div>
-                            <div class="card-body">
-                                <!-- Afficher la liste des notifications ici -->
-                            </div>
-                        </div>
-                    </div>
+                        if ($result->num_rows > 0) {
+                            $row = $result->fetch_assoc();
+                            echo '<p class="card-text">Nombre d\'enregistrements : ' . $result->num_rows . '</p>';
+                            // Ajoutez ici des lignes supplémentaires pour afficher d'autres informations spécifiques à la table
+                        } else {
+                            // Si la table est vide
+                            echo '<p class="card-text">La table est vide.</p>';
+                        }
 
-                    <div class="col-md-6 my-2">
-                        <div class="card">
-                            <div class="card-header">
-                                Notifications
-                            </div>
-                            <div class="card-body">
-                                <!-- Afficher la liste des notifications ici -->
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-md-6 my-2">
-                        <div class="card">
-                            <div class="card-header">
-                                Notifications
-                            </div>
-                            <div class="card-body">
-                                <!-- Afficher la liste des notifications ici -->
-                            </div>
-                        </div>
-                    </div>
-
-
-
-                    <!-- Ajoutez d'autres cartes pour d'autres fonctionnalités -->
-
+                        echo '</div>';
+                        echo '</div>';
+                        echo '</div>';
+                    }
+                    ?>
                 </div>
             </div>
             <!-- Colonne de droite pour les informations de l'utilisateur -->
             <div class="col-md-2 border-start border-secondary">
                 <?php
-                    include '../templates/user-card.php';
+                include '../templates/user-card.php';
                 ?>
             </div>
         </div>
