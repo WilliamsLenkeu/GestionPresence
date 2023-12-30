@@ -120,4 +120,11 @@ CREATE TABLE information_etudiant (
   FOREIGN KEY (filiere_id) REFERENCES filiere (id)
 );
 
--- ... (d'autres tables peuvent être ajoutées en fonction des besoins spécifiques)
+-- Table pour gérer les informations spécifiques aux enseignants
+CREATE TABLE information_enseignant (
+  utilisateur_matricule INT NOT NULL, -- Utilisation du matricule comme clé étrangère
+  specialite VARCHAR(255) NOT NULL,
+  bureau VARCHAR(255),
+  PRIMARY KEY (utilisateur_matricule),
+  FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule)
+);
