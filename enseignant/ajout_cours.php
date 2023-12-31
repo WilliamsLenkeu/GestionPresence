@@ -26,8 +26,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $descriptionCours = $_POST["description_cours"];
     $heuresAttribuees = $_POST["heures_attribuees"];
     $classeId = $_POST["classe_id"];
+    $heureDebut = $_POST["heure_debut"];
+    $heureFin = $_POST["heure_fin"];
     $enseignants = isset($_POST["enseignants"]) ? $_POST["enseignants"] : [];
     $eleves = isset($_POST["eleves"]) ? $_POST["eleves"] : [];
+
+    // Vérifier la disponibilité de la plage horaire dans le planning
+    $sqlCheckPlanning = "SELECT COUNT(*) FROM planning_cours WHERE classe_id = ? AND date = ? AND ((heure_debut <= ? AND heure_fin >= ?) OR (heure_debut <= ? AND heure_fin >= ?))";
+    $stmtCheckPlanning = $conn->prepare($sqlCheckPlanning);
+    $stmtCheckPlanning->bind_param("isssss", $classeId, $dateCours, $heureDebut, $heureDebut, $heureFin, $heureFin);
+
+    // Paramètre de date du cours
+    $dateCours = date('d-m-Y');  // Vous pouvez ajuster cela en fonction de votre application
+
+    // Exécuter la requête
+    $stmtCheckPlanning->execute();
+    $stmtCheckPlanning->bind_result($planningCount);
+    $stmtCheckPlanning->fetch();
+    $stmtCheckPlanning->close();
+
+    // Si la plage horaire n'est pas disponible, rediriger avec un message d'erreur
+    if ($planningCount > 0) {
+        header("Location: ajout_cours.php?error=planning_conflict");
+        exit;
+    }
 
     // Insérer le cours dans la table "cours"
     $sqlInsertCours = "INSERT INTO cours (nom, description, heures_attribuees, classe_id) VALUES (?, ?, ?, ?)";
@@ -94,6 +116,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="mb-3">
                                 <label for="heures_attribuees" class="form-label">Heures attribuées</label>
                                 <input type="number" class="form-control" id="heures_attribuees" name="heures_attribuees" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="heure_debut" class="form-label">Heure de début</label>
+                                <input type="time" class="form-control" id="heure_debut" name="heure_debut" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="heure_fin" class="form-label">Heure de fin</label>
+                                <input type="time" class="form-control" id="heure_fin" name="heure_fin" required>
                             </div>
                             <div class="mb-3">
                                 <label for="classe_id" class="form-label">Classe</label>

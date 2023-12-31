@@ -1,10 +1,7 @@
 <?php
-// Démarrez la session pour accéder aux variables de session
 session_start();
 
-// Vérifiez si le matricule est présent dans la session
 if (!isset($_SESSION['matricule'])) {
-    // Redirige vers la page index.php du dossier parent
     header('Location: ../logout.php');
     exit;
 }
@@ -13,7 +10,7 @@ include '../connexion.php';
 
 $matricule = $_SESSION['matricule'];
 
-$sqlProfil = "SELECT filiere_id FROM information_etudiant WHERE utilisateur_matricule = ?";
+$sqlProfil = "SELECT classe_id FROM information_etudiant WHERE utilisateur_matricule = ?";
 $stmtProfil = $conn->prepare($sqlProfil);
 $stmtProfil->bind_param("i", $matricule);
 $stmtProfil->execute();
@@ -25,37 +22,37 @@ if ($stmtProfil->num_rows == 0) {
     exit;
 }
 
-$stmtProfil->bind_result($filiereId);
+$stmtProfil->bind_result($classeId);
 $stmtProfil->fetch();
 $stmtProfil->close();
 
-// Récupérer la liste des étudiants de la même filière avec la somme de leurs heures d'absence
+// Récupérer la liste des étudiants de la même classe avec la somme de leurs heures d'absence
 $sqlListeEtudiants = "SELECT u.matricule, p.nom, p.prenom, COALESCE(SUM(c.heures_attribuees), 0) AS total_heures_absence
 FROM utilisateur u
 JOIN profil p ON u.matricule = p.utilisateur_matricule
 LEFT JOIN enregistrement_assiduite ea ON u.matricule = ea.utilisateur_matricule
 LEFT JOIN cours c ON ea.cours_id = c.id
 LEFT JOIN information_etudiant ie ON u.matricule = ie.utilisateur_matricule
-WHERE u.role = 'etudiant' AND ie.filiere_id = ?
+WHERE u.role = 'etudiant' AND ie.classe_id = ?
 GROUP BY u.matricule, p.nom, p.prenom, c.nom;";
 
 $stmtListeEtudiants = $conn->prepare($sqlListeEtudiants);
-$stmtListeEtudiants->bind_param("i", $filiereId);
+$stmtListeEtudiants->bind_param("i", $classeId);
 $stmtListeEtudiants->execute();
 $resultListeEtudiants = $stmtListeEtudiants->get_result();
 
-// Récupérer le nom de la filière
-$sqlNomFiliere = "SELECT nom FROM filiere WHERE id = ?";
-$stmtNomFiliere = $conn->prepare($sqlNomFiliere);
-$stmtNomFiliere->bind_param("i", $filiereId);
-$stmtNomFiliere->execute();
-$stmtNomFiliere->bind_result($nomFiliere);
-$stmtNomFiliere->fetch();
-$stmtNomFiliere->close();
+// Récupérer le nom de la classe
+$sqlNomClasse = "SELECT nom FROM classe WHERE id = ?";
+$stmtNomClasse = $conn->prepare($sqlNomClasse);
+$stmtNomClasse->bind_param("i", $classeId);
+$stmtNomClasse->execute();
+$stmtNomClasse->bind_result($nomClasse);
+$stmtNomClasse->fetch();
+$stmtNomClasse->close();
 ?>
 <nav class="navbar navbar-expand-lg flex-column border-end border-secondary h-100">
     <div class="row page-title " style="width:100% ;background:#fff">
-        <div class="fs-2 "> Liste des élèves de <?php echo $nomFiliere?></div>
+        <div class="fs-2 "> Liste des élèves de <?php echo $nomClasse?></div>
     </div>
     <!-- Liste des étudiants avec la somme de leurs heures d'absence -->
     <?php
@@ -73,7 +70,7 @@ $stmtNomFiliere->close();
         }
     } else {
         echo '<div class="col-md-12">';
-        echo '<p>Aucun étudiant trouvé dans la même filière.</p>';
+        echo '<p>Aucun étudiant trouvé dans la même classe.</p>';
         echo '</div>';
     }
     ?>
