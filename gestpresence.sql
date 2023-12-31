@@ -18,6 +18,14 @@ CREATE TABLE session (
     FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule)
 );
 
+-- Création de la table filiere
+CREATE TABLE filiere (
+    id INT NOT NULL AUTO_INCREMENT,
+    nom VARCHAR(255) NOT NULL,
+    description TEXT,
+    PRIMARY KEY (id)
+);
+
 -- Table pour gérer les profils des utilisateurs
 CREATE TABLE profil (
     id INT NOT NULL AUTO_INCREMENT,
@@ -103,14 +111,6 @@ CREATE TABLE historique_modifications (
     action_effectuee TEXT NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule)
-);
-
--- Création de la table filiere
-CREATE TABLE filiere (
-    id INT NOT NULL AUTO_INCREMENT,
-    nom VARCHAR(255) NOT NULL,
-    description TEXT,
-    PRIMARY KEY (id)
 );
 
 -- Table pour stocker des informations spécifiques aux étudiants
