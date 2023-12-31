@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmtAjoutFiliere->bind_param('ss', $nom, $description);
 
     if ($stmtAjoutFiliere->execute()) {
-        header('Location: liste_filieres.php'); // Rediriger après l'ajout de la filière
+        header('Location: liste_filiere.php'); // Rediriger après l'ajout de la filière
         exit;
     } else {
         echo 'Une erreur est survenue lors de l\'ajout de la filière. Veuillez réessayer.';
@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <label for="description" class="form-label">Description :</label>
                                 <textarea class="form-control" name="description" rows="3" required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Ajouter</button>
+                            <button type="submit" class="btn btn-primary btn-dark">Ajouter</button>
                         </form>
                     </div>
                 </div>
