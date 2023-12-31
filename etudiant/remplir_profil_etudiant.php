@@ -7,9 +7,6 @@ if (!isset($_SESSION['matricule'])) {
     exit;
 }
 
-
-
-
 // Connexion à la base de données (à adapter selon votre configuration)
 include '../connexion.php';
 
@@ -39,14 +36,13 @@ if ($stmtCheckProfil->num_rows > 0) {
 // Fermer la déclaration
 $stmtCheckProfil->close();
 
-
 // Vérifier si le formulaire a été soumis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Récupérer les données du formulaire
     $nom = $_POST['nom'];
     $prenom = $_POST['prenom'];
     $date_naissance = $_POST['date_naissance'];
-    $filiere_id = $_POST['filiere_id'];
+    $classe_id = $_POST['classe_id'];
 
     // Utilisation d'une transaction pour s'assurer que les deux requêtes réussissent ou échouent ensemble
     $conn->begin_transaction();
@@ -58,9 +54,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $profilSuccess = $stmtProfil->execute();
 
     // Insérer des données dans la table information_etudiant
-    $sqlInfoEtudiant = "INSERT INTO information_etudiant (utilisateur_matricule, filiere_id) VALUES (?, ?)";
+    $sqlInfoEtudiant = "INSERT INTO information_etudiant (utilisateur_matricule, classe_id) VALUES (?, ?)";
     $stmtInfoEtudiant = $conn->prepare($sqlInfoEtudiant);
-    $stmtInfoEtudiant->bind_param('ss', $matricule, $filiere_id);
+    $stmtInfoEtudiant->bind_param('ss', $matricule, $classe_id);
     $infoEtudiantSuccess = $stmtInfoEtudiant->execute();
 
     // Vérifier si les deux requêtes ont réussi
@@ -82,9 +78,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmtInfoEtudiant->close();
 }
 
-// Récupérer la liste des filières depuis la base de données
-$sqlFilieres = "SELECT id, nom FROM filiere";
-$resultFilieres = $conn->query($sqlFilieres);
+// Récupérer la liste des classes depuis la base de données
+$sqlClasses = "SELECT id, nom FROM classe";
+$resultClasses = $conn->query($sqlClasses);
 
 // Fermer la connexion
 $conn->close();
@@ -96,7 +92,7 @@ $conn->close();
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Remplir Profil Enseignant</title>
+    <title>Remplir Profil Etudiant</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <style>
         body {
@@ -138,13 +134,12 @@ $conn->close();
     </style>
 </head>
 
-
 <body class="fw-bold">
     <div class="container-fluid dash d-flex justify-content-center align-items-center vh-100">
         <!-- Ajoutez votre formulaire ici -->
         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="blur-background form-container">
-            <!-- Insérez ici les champs du formulaire (nom, prénom, date de naissance, filière, etc.) -->
-            <h2 class="mb-4 text-center">Remplir le Profil etudiant</h2>
+            <!-- Insérez ici les champs du formulaire (nom, prénom, date de naissance, classe, etc.) -->
+            <h2 class="mb-4 text-center">Remplir le Profil Etudiant</h2>
             <div class="mb-3">
                 <label for="nom" class="form-label">Nom :</label>
                 <input type="text" class="form-control" name="nom" required>
@@ -158,12 +153,12 @@ $conn->close();
                 <input type="date" class="form-control" name="date_naissance" required>
             </div>
             <div class="mb-3">
-                <label for="filiere_id" class="form-label">Filière :</label>
-                <select class="form-select" name="filiere_id" required>
+                <label for="classe_id" class="form-label">Classe :</label>
+                <select class="form-select" name="classe_id" required>
                     <?php
-                    // Afficher les options de filière
-                    while ($rowFiliere = $resultFilieres->fetch_assoc()) {
-                        echo '<option value="' . $rowFiliere['id'] . '">' . $rowFiliere['nom'] . '</option>';
+                    // Afficher les options de classe
+                    while ($rowClasse = $resultClasses->fetch_assoc()) {
+                        echo '<option value="' . $rowClasse['id'] . '">' . $rowClasse['nom'] . '</option>';
                     }
                     ?>
                 </select>
@@ -174,8 +169,8 @@ $conn->close();
 
     <!-- Bootstrap Script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
-     <!-- Validation Script -->
-     <script>
+    <!-- Validation Script -->
+    <script>
         // Désactiver la validation native du formulaire
         (function () {
             'use strict';

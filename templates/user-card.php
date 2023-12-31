@@ -63,31 +63,31 @@ if (isset($_SESSION['matricule'])) {
                     $stmt_enseignant->close();
                 } else {
                     // Si l'utilisateur est un étudiant, afficher les informations de la table information_etudiant
-                    $sql_etudiant = "SELECT filiere_id FROM information_etudiant WHERE utilisateur_matricule = ?";
+                    $sql_etudiant = "SELECT classe_id FROM information_etudiant WHERE utilisateur_matricule = ?";
                     $stmt_etudiant = $conn->prepare($sql_etudiant);
                     $stmt_etudiant->bind_param('s', $matricule);
                     $stmt_etudiant->execute();
                     $stmt_etudiant->store_result();
 
                     if ($stmt_etudiant->num_rows > 0) {
-                        $stmt_etudiant->bind_result($filiere_id);
+                        $stmt_etudiant->bind_result($classe_id);
                         $stmt_etudiant->fetch();
 
-                        // Récupérer le nom de la filière
-                        $sql_filiere = "SELECT nom FROM filiere WHERE id = ?";
-                        $stmt_filiere = $conn->prepare($sql_filiere);
-                        $stmt_filiere->bind_param('s', $filiere_id);
-                        $stmt_filiere->execute();
-                        $stmt_filiere->store_result();
+                        // Récupérer le nom de la classe
+                        $sql_classe = "SELECT nom FROM classe WHERE id = ?";
+                        $stmt_classe = $conn->prepare($sql_classe);
+                        $stmt_classe->bind_param('s', $classe_id);
+                        $stmt_classe->execute();
+                        $stmt_classe->store_result();
 
-                        if ($stmt_filiere->num_rows > 0) {
-                            $stmt_filiere->bind_result($nom_filiere);
-                            $stmt_filiere->fetch();
+                        if ($stmt_classe->num_rows > 0) {
+                            $stmt_classe->bind_result($nom_classe);
+                            $stmt_classe->fetch();
                 ?>
-                            <p class="card-text">Filière: <?php echo $nom_filiere; ?></p>
+                            <p class="card-text">Classe: <?php echo $nom_classe; ?></p>
                 <?php
                         }
-                        $stmt_filiere->close();
+                        $stmt_classe->close();
                     }
                     $stmt_etudiant->close();
                 }
@@ -126,7 +126,7 @@ if (isset($_SESSION['matricule'])) {
     $conn->close();
 } else {
     // Rediriger si le matricule n'est pas présent dans la session
-    header('Location: ./logout.php');
+    header('Location: ../logout.php');
     exit;
 }
 ?>

@@ -58,7 +58,7 @@ if ($stmt->num_rows == 0) {
                 <div class="row mt-4 fw-normal">
                     <?php
                     // Liste des tables à afficher
-                    $tables = array("utilisateur", "session", "cours", "session_academique", "justificatif", "notification", "filiere");
+                    $tables = array("utilisateur", "session", "cours", "session_academique", "justificatif", "notification", "classe");
 
                     // Parcourir les tables et afficher un résumé sous forme de carte pour chaque table
                     foreach ($tables as $table) {
