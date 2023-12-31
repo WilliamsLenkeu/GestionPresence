@@ -23,33 +23,42 @@ $stmtClasse->store_result();
 $stmtClasse->bind_result($classe_id);
 $stmtClasse->fetch();
 
-// Récupérer les cours non facultatifs de la classe de l'étudiant
-$sqlCours = "SELECT id FROM cours WHERE classe_id = ? AND facultatif = 0";
-$stmtCours = $conn->prepare($sqlCours);
-$stmtCours->bind_param("i", $classe_id);
-$stmtCours->execute();
-$resultCours = $stmtCours->get_result();
+// Vérifier les cours non facultatifs de la classe
+$sqlCoursNonFacultatifs = "SELECT id FROM cours WHERE classe_id = ? AND facultatif = 0";
+$stmtCoursNonFacultatifs = $conn->prepare($sqlCoursNonFacultatifs);
+$stmtCoursNonFacultatifs->bind_param("i", $classe_id);
+$stmtCoursNonFacultatifs->execute();
+$resultCoursNonFacultatifs = $stmtCoursNonFacultatifs->get_result();
+echo '<script>alert("Test1");</script>';
 
-// Insérer l'étudiant dans les cours qui ne sont pas facultatifs et auxquels il n'est pas déjà inscrit
-while ($cours = $resultCours->fetch_assoc()) {
-    $cours_id = $cours['id'];
+// Vérifier et inscrire l'étudiant à chaque cours non facultatif s'il n'est pas déjà inscrit
+while ($rowCours = $resultCoursNonFacultatifs->fetch_assoc()) {
+    echo '<script>alert("Test2");</script>';
+    $cours_id = $rowCours['id'];
 
-    // Vérifier si l'étudiant est déjà inscrit à ce cours
-    $sqlCheckInscription = "SELECT id FROM attribution_cours WHERE utilisateur_matricule = ? AND cours_id = ?";
-    $stmtCheckInscription = $conn->prepare($sqlCheckInscription);
-    $stmtCheckInscription->bind_param("ii", $utilisateur_matricule, $cours_id);
-    $stmtCheckInscription->execute();
-    $resultCheckInscription = $stmtCheckInscription->get_result();
+    // Vérifier si l'étudiant n'est pas déjà inscrit au cours
+    $sqlVerificationInscription = "SELECT COUNT(*) FROM attribution_cours WHERE utilisateur_matricule = ? AND cours_id = ?";
+    $stmtVerificationInscription = $conn->prepare($sqlVerificationInscription);
+    $stmtVerificationInscription->bind_param("ii", $utilisateur_matricule, $cours_id);
+    $stmtVerificationInscription->execute();
+    $stmtVerificationInscription->bind_result($countInscription);
+    $stmtVerificationInscription->fetch();
 
-    // Si l'étudiant n'est pas déjà inscrit, l'insérer
-    if ($resultCheckInscription->num_rows == 0) {
-        $sqlInsertInscription = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
-        $stmtInsertInscription = $conn->prepare($sqlInsertInscription);
-        $stmtInsertInscription->bind_param("iii", $utilisateur_matricule, $cours_id, $classe_id);
-        $stmtInsertInscription->execute();
+    // Si l'étudiant n'est pas déjà inscrit, l'inscrire
+    if ($countInscription == 0) {
+        // Inscrire l'étudiant au cours
+        $sqlInscription = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
+        $stmtInscription = $conn->prepare($sqlInscription);
+        $stmtInscription->bind_param("iii", $utilisateur_matricule, $cours_id, $classe_id);
+        $stmtInscription->execute();
+    }else{
+        echo '<script>alert("Test");</script>';
     }
 }
 
+$stmtCoursNonFacultatifs->close();
+$stmtClasse->close();
+$conn->close();
 ?>
 
 <!DOCTYPE html>
@@ -119,7 +128,7 @@ while ($cours = $resultCours->fetch_assoc()) {
             <div class="container-fluid">
                 <!-- Logo -->
                 <a class="navbar-brand" href="#">
-                    <img src="../image/logo-banner.jpg" alt="Logo"> Gerez, suivez, excellez. Study Check
+                    <img src="../image/logo-banner.jpg" alt="Logo">
                 </a>
             </div>
         </nav>

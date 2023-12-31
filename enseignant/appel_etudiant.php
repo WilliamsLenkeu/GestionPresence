@@ -12,13 +12,18 @@ if (!isset($_SESSION['matricule'])) {
 // Inclure le fichier de connexion à la base de données
 include '../connexion.php';
 
-// Récupérer le cours à partir de l'URL
-$cours = isset($_GET['cours']) ? $_GET['cours'] : '';
+// Récupérer le nom du cours à partir de l'URL
+$nomCours = isset($_GET['cours']) ? $_GET['cours'] : '';
 
-// Vérifier la connexion
-if ($conn->connect_error) {
-    die("La connexion à la base de données avec MySQLi a échoué : " . $conn->connect_error);
-}
+// Récupérer l'ID du cours
+$sqlCoursId = "SELECT id FROM cours WHERE nom = ?";
+$stmtCoursId = $conn->prepare($sqlCoursId);
+$stmtCoursId->bind_param('s', $nomCours);
+$stmtCoursId->execute();
+$resultCoursId = $stmtCoursId->get_result();
+$coursId = $resultCoursId->fetch_assoc()['id'];
+
+$stmtCoursId->close();
 
 // Récupérer les étudiants du cours depuis la base de données
 $sqlEtudiants = "
@@ -28,11 +33,11 @@ $sqlEtudiants = "
     INNER JOIN cours ON attribution_cours.cours_id = cours.id
     INNER JOIN classe ON utilisateur.classe_id = classe.id
     INNER JOIN profil ON utilisateur.matricule = profil.utilisateur_matricule
-    WHERE cours.nom = ?;
+    WHERE cours.id = ? AND attribution_cours.cours_id = cours.id;
 ";
 
 $stmtEtudiants = $conn->prepare($sqlEtudiants);
-$stmtEtudiants->bind_param('s', $cours);
+$stmtEtudiants->bind_param('i', $coursId);
 $stmtEtudiants->execute();
 $resultEtudiants = $stmtEtudiants->get_result();
 
@@ -68,30 +73,36 @@ $conn->close();
                     <div class="fs-2 mt-3"> Liste D'appels - <?php echo isset($_GET['cours']) ? $_GET['cours'] : ''; ?></div>
                 </div>
                 <div class="row mt-4 fw-normal">
-                    <table class="table">
-                        <thead>
-                            <tr>
-                                <th scope="col">#</th>
-                                <th scope="col">Nom</th>
-                                <th scope="col">Matricule</th>
-                                <th scope="col">Classe</th>
-                                <th scope="col">Présent</th>
-                                <th scope="col">Absent</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php foreach ($etudiants as $index => $etudiant) : ?>
+                    <?php if (empty($etudiants)) : ?>
+                        <div class="alert alert-warning" role="alert">
+                            Aucun étudiant inscrit à ce cours.
+                        </div>
+                    <?php else : ?>
+                        <table class="table">
+                            <thead>
                                 <tr>
-                                    <th scope="row"><?= $index + 1 ?></th>
-                                    <td><?= $etudiant['nom'] ?></td>
-                                    <td><?= $etudiant['matricule'] ?></td>
-                                    <td><?= $etudiant['classe_nom'] ?></td>
-                                    <td><input type="checkbox" name="present_<?= $index ?>" value="present"></td>
-                                    <td><input type="checkbox" name="absent_<?= $index ?>" value="absent"></td>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Nom</th>
+                                    <th scope="col">Matricule</th>
+                                    <th scope="col">Classe</th>
+                                    <th scope="col">Présent</th>
+                                    <th scope="col">Absent</th>
                                 </tr>
-                            <?php endforeach; ?>
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($etudiants as $index => $etudiant) : ?>
+                                    <tr>
+                                        <th scope="row"><?= $index + 1 ?></th>
+                                        <td><?= $etudiant['nom'] ?></td>
+                                        <td><?= $etudiant['matricule'] ?></td>
+                                        <td><?= $etudiant['classe_nom'] ?></td>
+                                        <td><input type="checkbox" name="present_<?= $index ?>" value="present"></td>
+                                        <td><input type="checkbox" name="absent_<?= $index ?>" value="absent"></td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="col-md-2 border-start border-secondary">
