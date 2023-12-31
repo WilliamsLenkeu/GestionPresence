@@ -15,9 +15,9 @@ $resultEnseignants = $conn->query($sqlEnseignants);
 $sqlEleves = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant'";
 $resultEleves = $conn->query($sqlEleves);
 
-// Récupérer la liste des filières
-$sqlFilieres = "SELECT id, nom FROM filiere";
-$resultFilieres = $conn->query($sqlFilieres);
+// Récupérer la liste des classes
+$sqlClasses = "SELECT id, nom FROM classe";
+$resultClasses = $conn->query($sqlClasses);
 
 // Gérer la soumission du formulaire d'ajout de cours
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -25,28 +25,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nomCours = $_POST["nom_cours"];
     $descriptionCours = $_POST["description_cours"];
     $heuresAttribuees = $_POST["heures_attribuees"];
-    $filiereId = $_POST["filiere_id"];
+    $classeId = $_POST["classe_id"];
     $enseignants = isset($_POST["enseignants"]) ? $_POST["enseignants"] : [];
     $eleves = isset($_POST["eleves"]) ? $_POST["eleves"] : [];
 
     // Insérer le cours dans la table "cours"
-    $sqlInsertCours = "INSERT INTO cours (nom, description, heures_attribuees, filiere_id) VALUES (?, ?, ?, ?)";
+    $sqlInsertCours = "INSERT INTO cours (nom, description, heures_attribuees, classe_id) VALUES (?, ?, ?, ?)";
     $stmtInsertCours = $conn->prepare($sqlInsertCours);
-    $stmtInsertCours->bind_param("ssii", $nomCours, $descriptionCours, $heuresAttribuees, $filiereId);
+    $stmtInsertCours->bind_param("ssii", $nomCours, $descriptionCours, $heuresAttribuees, $classeId);
     $stmtInsertCours->execute();
     $coursId = $stmtInsertCours->insert_id;
 
     // Associer les enseignants au cours dans la table "attribution_cours"
     foreach ($enseignants as $enseignant) {
-        $sqlInsertAttribution = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id) VALUES (?, ?)";
+        $sqlInsertAttribution = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
         $stmtInsertAttribution = $conn->prepare($sqlInsertAttribution);
-        $stmtInsertAttribution->bind_param("ii", $enseignant, $coursId);
+        $stmtInsertAttribution->bind_param("iii", $enseignant, $coursId, $classeId);
         $stmtInsertAttribution->execute();
     }
 
-    // Associer les élèves au cours dans une table appropriée (à adapter en fonction de votre modèle)
-    // Note : La structure exacte dépend de la façon dont vous gérez les élèves attribués à un cours.
-    // Vous pourriez créer une nouvelle table "attribution_eleves_cours" avec les colonnes nécessaires.
+    // Associer les élèves au cours dans la table "attribution_eleves_cours"
+    foreach ($eleves as $eleve) {
+        $sqlInsertAttributionEleve = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
+        $stmtInsertAttributionEleve = $conn->prepare($sqlInsertAttributionEleve);
+        $stmtInsertAttributionEleve->bind_param("iii", $eleve, $coursId, $classeId);
+        $stmtInsertAttributionEleve->execute();
+    }
 
     // Rediriger vers la page de liste des cours après l'ajout
     header("Location: liste_cours.php");
@@ -92,11 +96,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <input type="number" class="form-control" id="heures_attribuees" name="heures_attribuees" required>
                             </div>
                             <div class="mb-3">
-                                <label for="filiere_id" class="form-label">Filière</label>
-                                <select class="form-control" id="filiere_id" name="filiere_id" required>
+                                <label for="classe_id" class="form-label">Classe</label>
+                                <select class="form-control" id="classe_id" name="classe_id" required>
                                     <?php
-                                    while ($rowFiliere = $resultFilieres->fetch_assoc()) {
-                                        echo '<option value="' . $rowFiliere["id"] . '">' . $rowFiliere["nom"] . '</option>';
+                                    while ($rowClasse = $resultClasses->fetch_assoc()) {
+                                        echo '<option value="' . $rowClasse["id"] . '">' . $rowClasse["nom"] . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -106,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <select multiple class="form-control" id="enseignants" name="enseignants[]">
                                     <?php
                                     while ($rowEnseignant = $resultEnseignants->fetch_assoc()) {
-                                        echo '<option value="' . $rowEnseignant["matricule"] . '">' . $rowEnseignant["nom"] . ' ' . $rowEnseignant["prenom"] . '</option>';
+                                        echo '<option value="' . $rowEnseignant["matricule"] . '">' . $rowEnseignant["prenom"] . ' ' . $rowEnseignant["nom"] . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -115,13 +119,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <label for="eleves" class="form-label">Étudiants</label>
                                 <select multiple class="form-control" id="eleves" name="eleves[]">
                                     <?php
+                                    // Récupérer la liste des élèves
                                     while ($rowEleve = $resultEleves->fetch_assoc()) {
-                                        echo '<option value="' . $rowEleve["matricule"] . '">' . $rowEleve["nom"] . ' ' . $rowEleve["prenom"] . '</option>';
+                                        $selected = in_array($rowEleve["matricule"], $eleves) ? 'selected' : '';
+                                        echo '<option value="' . $rowEleve["matricule"] . '" ' . $selected . '>' . $rowEleve["nom"] . ' ' . $rowEleve["prenom"] . '</option>';
                                     }
                                     ?>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary">Ajouter le Cours</button>
+
+                            <button type="submit" class="btn btn-primary btn-dark">Ajouter</button>
                         </form>
                     </div>
                 </div>
@@ -133,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <!-- Bootstrap Script -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"/>
 </body>
 
 </html>

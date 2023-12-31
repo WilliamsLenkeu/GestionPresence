@@ -30,25 +30,25 @@ if (!$isAdmin) {
     exit;
 }
 
-// Traitement du formulaire d'ajout de filière
+// Traitement du formulaire d'ajout de classe
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nom = $_POST['nom'];
     $description = $_POST['description'];
 
     // Utilisation d'une requête préparée pour éviter les attaques par injection SQL
-    $sqlAjoutFiliere = "INSERT INTO filiere (nom, description) VALUES (?, ?)";
-    $stmtAjoutFiliere = $conn->prepare($sqlAjoutFiliere);
-    $stmtAjoutFiliere->bind_param('ss', $nom, $description);
+    $sqlAjoutClasse = "INSERT INTO classe (nom, description) VALUES (?, ?)";
+    $stmtAjoutClasse = $conn->prepare($sqlAjoutClasse);
+    $stmtAjoutClasse->bind_param('ss', $nom, $description);
 
-    if ($stmtAjoutFiliere->execute()) {
-        header('Location: liste_filiere.php'); // Rediriger après l'ajout de la filière
+    if ($stmtAjoutClasse->execute()) {
+        header('Location: liste_filiere.php');
         exit;
     } else {
-        echo 'Une erreur est survenue lors de l\'ajout de la filière. Veuillez réessayer.';
+        echo 'Une erreur est survenue lors de l\'ajout de la classe. Veuillez réessayer.';
     }
 
     // Fermer la déclaration
-    $stmtAjoutFiliere->close();
+    $stmtAjoutClasse->close();
 }
 
 ?>
@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Ajouter une Filière</title>
+    <title>Ajouter une Classe</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="../css/style.css" type="text/css" />
     <link rel="icon" href="../image/logo.jpg" type="image/x-icon">
@@ -75,14 +75,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <div class="col-md col-12">
                 <div class="row page-title shadow-lg">
-                    <div class="fs-2 mt-3"> Ajouter une Filière </div>
+                    <div class="fs-2 mt-3"> Ajouter une Classe </div>
                 </div>
                 <div class="row mt-4 fw-normal">
-                    <!-- Formulaire d'ajout de filière -->
+                    <!-- Formulaire d'ajout de classe -->
                     <div class="col-md-6">
                         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                             <div class="mb-3">
-                                <label for="nom" class="form-label">Nom de la Filière :</label>
+                                <label for="nom" class="form-label">Nom de la Classe :</label>
                                 <input type="text" class="form-control" name="nom" required>
                             </div>
                             <div class="mb-3">
@@ -102,4 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <!-- Bootstrap Script -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"/>
+</body>
+
+</html>
