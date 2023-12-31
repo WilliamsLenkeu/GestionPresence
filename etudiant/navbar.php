@@ -43,10 +43,19 @@ $stmtListeEtudiants = $conn->prepare($sqlListeEtudiants);
 $stmtListeEtudiants->bind_param("i", $filiereId);
 $stmtListeEtudiants->execute();
 $resultListeEtudiants = $stmtListeEtudiants->get_result();
+
+// Récupérer le nom de la filière
+$sqlNomFiliere = "SELECT nom FROM filiere WHERE id = ?";
+$stmtNomFiliere = $conn->prepare($sqlNomFiliere);
+$stmtNomFiliere->bind_param("i", $filiereId);
+$stmtNomFiliere->execute();
+$stmtNomFiliere->bind_result($nomFiliere);
+$stmtNomFiliere->fetch();
+$stmtNomFiliere->close();
 ?>
 <nav class="navbar navbar-expand-lg flex-column border-end border-secondary h-100">
-    <div class="row page-title ">
-        <div class="fs-2 "> Liste des élèves</div>
+    <div class="row page-title " style="width:100% ;background:#fff">
+        <div class="fs-2 "> Liste des élèves de <?php echo $nomFiliere?></div>
     </div>
     <!-- Liste des étudiants avec la somme de leurs heures d'absence -->
     <?php

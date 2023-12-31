@@ -87,6 +87,7 @@
                 </div>
                 <div class="row mt-4 fw-normal">
                     <!-- Contenu du tableau de bord -->
+                    
                 </div>
             </div>
             <!-- Colonne de droite pour les informations de l'utilisateur -->
