@@ -11,10 +11,6 @@ if ($conn->connect_error) {
 $sqlEnseignants = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'enseignant'";
 $resultEnseignants = $conn->query($sqlEnseignants);
 
-// Récupérer la liste des élèves avec leurs informations de profil
-$sqlEleves = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant'";
-$resultEleves = $conn->query($sqlEleves);
-
 // Récupérer la liste des classes
 $sqlClasses = "SELECT id, nom FROM classe";
 $resultClasses = $conn->query($sqlClasses);
@@ -26,30 +22,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $descriptionCours = $_POST["description_cours"];
     $heuresAttribuees = $_POST["heures_attribuees"];
     $classeId = $_POST["classe_id"];
-    $heureDebut = $_POST["heure_debut"];
-    $heureFin = $_POST["heure_fin"];
     $enseignants = isset($_POST["enseignants"]) ? $_POST["enseignants"] : [];
     $eleves = isset($_POST["eleves"]) ? $_POST["eleves"] : [];
-
-    // Vérifier la disponibilité de la plage horaire dans le planning
-    $sqlCheckPlanning = "SELECT COUNT(*) FROM planning_cours WHERE classe_id = ? AND date = ? AND ((heure_debut <= ? AND heure_fin >= ?) OR (heure_debut <= ? AND heure_fin >= ?))";
-    $stmtCheckPlanning = $conn->prepare($sqlCheckPlanning);
-    $stmtCheckPlanning->bind_param("isssss", $classeId, $dateCours, $heureDebut, $heureDebut, $heureFin, $heureFin);
-
-    // Paramètre de date du cours
-    $dateCours = date('d-m-Y');  // Vous pouvez ajuster cela en fonction de votre application
-
-    // Exécuter la requête
-    $stmtCheckPlanning->execute();
-    $stmtCheckPlanning->bind_result($planningCount);
-    $stmtCheckPlanning->fetch();
-    $stmtCheckPlanning->close();
-
-    // Si la plage horaire n'est pas disponible, rediriger avec un message d'erreur
-    if ($planningCount > 0) {
-        header("Location: ajout_cours.php?error=planning_conflict");
-        exit;
-    }
+    
+    // Ajouter les champs du planning_cours
+    $dateDebut = $_POST["date_debut"];
+    $dateFin = $_POST["date_fin"];
+    $heureDebut = $_POST["heure_debut"];
+    $heureFin = $_POST["heure_fin"];
 
     // Insérer le cours dans la table "cours"
     $sqlInsertCours = "INSERT INTO cours (nom, description, heures_attribuees, classe_id) VALUES (?, ?, ?, ?)";
@@ -58,20 +38,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmtInsertCours->execute();
     $coursId = $stmtInsertCours->insert_id;
 
+    // Insérer les informations dans la table "planning_cours"
+    $sqlInsertPlanning = "INSERT INTO planning_cours (cours_id, date, heure_debut, heure_fin) VALUES (?, ?, ?, ?)";
+    $stmtInsertPlanning = $conn->prepare($sqlInsertPlanning);
+    $stmtInsertPlanning->bind_param("isss", $coursId, $dateDebut, $heureDebut, $heureFin);
+    $stmtInsertPlanning->execute();
+
     // Associer les enseignants au cours dans la table "attribution_cours"
     foreach ($enseignants as $enseignant) {
         $sqlInsertAttribution = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
         $stmtInsertAttribution = $conn->prepare($sqlInsertAttribution);
         $stmtInsertAttribution->bind_param("iii", $enseignant, $coursId, $classeId);
         $stmtInsertAttribution->execute();
-    }
-
-    // Associer les élèves au cours dans la table "attribution_eleves_cours"
-    foreach ($eleves as $eleve) {
-        $sqlInsertAttributionEleve = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
-        $stmtInsertAttributionEleve = $conn->prepare($sqlInsertAttributionEleve);
-        $stmtInsertAttributionEleve->bind_param("iii", $eleve, $coursId, $classeId);
-        $stmtInsertAttributionEleve->execute();
     }
 
     // Rediriger vers la page de liste des cours après l'ajout
@@ -103,7 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="fs-2 mt-3"> Ajouter un Cours </div>
                 </div>
                 <div class="row mt-4 fw-normal">
-                    <div class="col-md-6">
+                    <div class="col-md-12">
                         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                             <div class="mb-3">
                                 <label for="nom_cours" class="form-label">Nom du Cours</label>
@@ -118,6 +96,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <input type="number" class="form-control" id="heures_attribuees" name="heures_attribuees" required>
                             </div>
                             <div class="mb-3">
+                                <label for="date_debut" class="form-label">Date de début</label>
+                                <input type="date" class="form-control" id="date_debut" name="date_debut" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="date_fin" class="form-label">Date de fin</label>
+                                <input type="date" class="form-control" id="date_fin" name="date_fin" required>
+                            </div>
+                            <div class="mb-3">
                                 <label for="heure_debut" class="form-label">Heure de début</label>
                                 <input type="time" class="form-control" id="heure_debut" name="heure_debut" required>
                             </div>
@@ -129,8 +115,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <label for="classe_id" class="form-label">Classe</label>
                                 <select class="form-control" id="classe_id" name="classe_id" required>
                                     <?php
+                                    // Afficher les options de la liste déroulante pour les classes
                                     while ($rowClasse = $resultClasses->fetch_assoc()) {
-                                        echo '<option value="' . $rowClasse["id"] . '">' . $rowClasse["nom"] . '</option>';
+                                        // Vérifier et sélectionner la classe précédemment sélectionnée
+                                        $selected = ($classeId == $rowClasse["id"]) ? 'selected' : '';
+                                        echo '<option value="' . $rowClasse["id"] . '" ' . $selected . '>' . $rowClasse["nom"] . '</option>';
                                     }
                                     ?>
                                 </select>
@@ -145,18 +134,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     ?>
                                 </select>
                             </div>
+
                             <div class="mb-3">
-                                <label for="eleves" class="form-label">Étudiants</label>
+                                <label for="eleves" class="form-label">Étudiants de la classe</label>
                                 <select multiple class="form-control" id="eleves" name="eleves[]">
                                     <?php
-                                    // Récupérer la liste des élèves
-                                    while ($rowEleve = $resultEleves->fetch_assoc()) {
-                                        $selected = in_array($rowEleve["matricule"], $eleves) ? 'selected' : '';
-                                        echo '<option value="' . $rowEleve["matricule"] . '" ' . $selected . '>' . $rowEleve["nom"] . ' ' . $rowEleve["prenom"] . '</option>';
+                                    // Récupérer la liste des étudiants de la classe sélectionnée
+                                    $sqlElevesClasse = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant' AND u.classe_id = ?";
+                                    $stmtElevesClasse = $conn->prepare($sqlElevesClasse);
+                                    $stmtElevesClasse->bind_param("i", $classeId);
+                                    $stmtElevesClasse->execute();
+                                    $resultElevesClasse = $stmtElevesClasse->get_result();
+
+                                    // Afficher les options de la liste déroulante pour les étudiants de la classe
+                                    while ($rowEleve = $resultElevesClasse->fetch_assoc()) {
+                                        echo '<option value="' . $rowEleve["matricule"] . '">' . $rowEleve["prenom"] . ' ' . $rowEleve["nom"] . '</option>';
                                     }
                                     ?>
                                 </select>
                             </div>
+
 
                             <button type="submit" class="btn btn-primary btn-dark">Ajouter</button>
                         </form>
