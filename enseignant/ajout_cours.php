@@ -98,7 +98,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     ?>
                                 </select>
                             </div>
-                            <!-- Ajoutez ici la sélection des élèves si nécessaire -->
+                            <div class="mb-3">
+                                <label for="eleves" class="form-label">Étudiants</label>
+                                <select multiple class="form-control" id="eleves" name="eleves[]">
+                                    <?php
+                                    while ($rowEleve = $resultEleves->fetch_assoc()) {
+                                        echo '<option value="' . $rowEleve["matricule"] . '">' . $rowEleve["nom"] . ' ' . $rowEleve["prenom"] . '</option>';
+                                    }
+                                    ?>
+                                </select>
+                            </div>
                             <button type="submit" class="btn btn-primary">Ajouter le Cours</button>
                         </form>
                     </div>
