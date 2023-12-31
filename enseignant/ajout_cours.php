@@ -11,6 +11,10 @@ if ($conn->connect_error) {
 $sqlEnseignants = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'enseignant'";
 $resultEnseignants = $conn->query($sqlEnseignants);
 
+// Récupérer la liste des élèves avec leurs informations de profil
+$sqlEleves = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant'";
+$resultEleves = $conn->query($sqlEleves);
+
 // Récupérer la liste des classes
 $sqlClasses = "SELECT id, nom FROM classe";
 $resultClasses = $conn->query($sqlClasses);
@@ -20,29 +24,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Récupérer les données du formulaire
     $nomCours = $_POST["nom_cours"];
     $descriptionCours = $_POST["description_cours"];
-    $heuresAttribuees = $_POST["heures_attribuees"];
     $classeId = $_POST["classe_id"];
     $enseignants = isset($_POST["enseignants"]) ? $_POST["enseignants"] : [];
-    $eleves = isset($_POST["eleves"]) ? $_POST["eleves"] : [];
-    
-    // Ajouter les champs du planning_cours
-    $dateDebut = $_POST["date_debut"];
-    $dateFin = $_POST["date_fin"];
-    $heureDebut = $_POST["heure_debut"];
-    $heureFin = $_POST["heure_fin"];
+
+    // Ajout du champ facultatif pour les cours
+    $facultatif = isset($_POST["facultatif"]) ? 1 : 0;
 
     // Insérer le cours dans la table "cours"
-    $sqlInsertCours = "INSERT INTO cours (nom, description, heures_attribuees, classe_id) VALUES (?, ?, ?, ?)";
+    $sqlInsertCours = "INSERT INTO cours (nom, description, facultatif, classe_id) VALUES (?, ?, ?, ?)";
     $stmtInsertCours = $conn->prepare($sqlInsertCours);
-    $stmtInsertCours->bind_param("ssii", $nomCours, $descriptionCours, $heuresAttribuees, $classeId);
+    $stmtInsertCours->bind_param("ssii", $nomCours, $descriptionCours, $facultatif, $classeId);
     $stmtInsertCours->execute();
     $coursId = $stmtInsertCours->insert_id;
-
-    // Insérer les informations dans la table "planning_cours"
-    $sqlInsertPlanning = "INSERT INTO planning_cours (cours_id, date, heure_debut, heure_fin) VALUES (?, ?, ?, ?)";
-    $stmtInsertPlanning = $conn->prepare($sqlInsertPlanning);
-    $stmtInsertPlanning->bind_param("isss", $coursId, $dateDebut, $heureDebut, $heureFin);
-    $stmtInsertPlanning->execute();
 
     // Associer les enseignants au cours dans la table "attribution_cours"
     foreach ($enseignants as $enseignant) {
@@ -81,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="fs-2 mt-3"> Ajouter un Cours </div>
                 </div>
                 <div class="row mt-4 fw-normal">
-                    <div class="col-md-12">
+                    <div class="col-md-6">
                         <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
                             <div class="mb-3">
                                 <label for="nom_cours" class="form-label">Nom du Cours</label>
@@ -92,37 +85,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <textarea class="form-control" id="description_cours" name="description_cours" rows="3"></textarea>
                             </div>
                             <div class="mb-3">
-                                <label for="heures_attribuees" class="form-label">Heures attribuées</label>
-                                <input type="number" class="form-control" id="heures_attribuees" name="heures_attribuees" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="date_debut" class="form-label">Date de début</label>
-                                <input type="date" class="form-control" id="date_debut" name="date_debut" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="date_fin" class="form-label">Date de fin</label>
-                                <input type="date" class="form-control" id="date_fin" name="date_fin" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="heure_debut" class="form-label">Heure de début</label>
-                                <input type="time" class="form-control" id="heure_debut" name="heure_debut" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="heure_fin" class="form-label">Heure de fin</label>
-                                <input type="time" class="form-control" id="heure_fin" name="heure_fin" required>
-                            </div>
-                            <div class="mb-3">
                                 <label for="classe_id" class="form-label">Classe</label>
                                 <select class="form-control" id="classe_id" name="classe_id" required>
                                     <?php
-                                    // Afficher les options de la liste déroulante pour les classes
                                     while ($rowClasse = $resultClasses->fetch_assoc()) {
-                                        // Vérifier et sélectionner la classe précédemment sélectionnée
-                                        $selected = ($classeId == $rowClasse["id"]) ? 'selected' : '';
-                                        echo '<option value="' . $rowClasse["id"] . '" ' . $selected . '>' . $rowClasse["nom"] . '</option>';
+                                        echo '<option value="' . $rowClasse["id"] . '">' . $rowClasse["nom"] . '</option>';
                                     }
                                     ?>
                                 </select>
+                            </div>
+                            <div class="mb-3 form-check">
+                                <input type="checkbox" class="form-check-input" id="facultatif" name="facultatif">
+                                <label class="form-check-label" for="facultatif">Cours facultatif</label>
                             </div>
                             <div class="mb-3">
                                 <label for="enseignants" class="form-label">Enseignants</label>
@@ -134,27 +108,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     ?>
                                 </select>
                             </div>
-
-                            <div class="mb-3">
-                                <label for="eleves" class="form-label">Étudiants de la classe</label>
-                                <select multiple class="form-control" id="eleves" name="eleves[]">
-                                    <?php
-                                    // Récupérer la liste des étudiants de la classe sélectionnée
-                                    $sqlElevesClasse = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant' AND u.classe_id = ?";
-                                    $stmtElevesClasse = $conn->prepare($sqlElevesClasse);
-                                    $stmtElevesClasse->bind_param("i", $classeId);
-                                    $stmtElevesClasse->execute();
-                                    $resultElevesClasse = $stmtElevesClasse->get_result();
-
-                                    // Afficher les options de la liste déroulante pour les étudiants de la classe
-                                    while ($rowEleve = $resultElevesClasse->fetch_assoc()) {
-                                        echo '<option value="' . $rowEleve["matricule"] . '">' . $rowEleve["prenom"] . ' ' . $rowEleve["nom"] . '</option>';
-                                    }
-                                    ?>
-                                </select>
-                            </div>
-
-
+                            
                             <button type="submit" class="btn btn-primary btn-dark">Ajouter</button>
                         </form>
                     </div>

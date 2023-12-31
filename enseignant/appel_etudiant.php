@@ -4,12 +4,45 @@ session_start();
 
 // Vérifiez si le matricule est présent dans la session
 if (!isset($_SESSION['matricule'])) {
-    // Redirige vers la page index.php du dossier parent
+    // Redirige vers la page logout.php du dossier parent
     header('Location: ../logout.php');
     exit;
 }
 
+// Inclure le fichier de connexion à la base de données
+include '../connexion.php';
+
+// Récupérer le cours à partir de l'URL
+$cours = isset($_GET['cours']) ? $_GET['cours'] : '';
+
+// Vérifier la connexion
+if ($conn->connect_error) {
+    die("La connexion à la base de données avec MySQLi a échoué : " . $conn->connect_error);
+}
+
+// Récupérer les étudiants du cours depuis la base de données
+$sqlEtudiants = "
+    SELECT utilisateur.matricule, profil.nom, profil.prenom, classe.nom AS classe_nom
+    FROM utilisateur
+    INNER JOIN attribution_cours ON utilisateur.matricule = attribution_cours.utilisateur_matricule
+    INNER JOIN cours ON attribution_cours.cours_id = cours.id
+    INNER JOIN classe ON utilisateur.classe_id = classe.id
+    INNER JOIN profil ON utilisateur.matricule = profil.utilisateur_matricule
+    WHERE cours.nom = ?;
+";
+
+$stmtEtudiants = $conn->prepare($sqlEtudiants);
+$stmtEtudiants->bind_param('s', $cours);
+$stmtEtudiants->execute();
+$resultEtudiants = $stmtEtudiants->get_result();
+
+// Charger les résultats dans un tableau
+$etudiants = $resultEtudiants->fetch_all(MYSQLI_ASSOC);
+
+$stmtEtudiants->close();
+$conn->close();
 ?>
+
 <!doctype html>
 <html lang="fr">
 
@@ -25,13 +58,10 @@ if (!isset($_SESSION['matricule'])) {
 
 <body class="fw-bold">
     <div class="container-fluid dash">
-
         <!-- Section du tableau de bord -->
         <div class="row dash-1">
             <div class="col-md-2 border-end border-secondary text-center">
-                <?php
-                    include './navbar.php';
-                ?>
+                <?php include './navbar.php'; ?>
             </div>
             <div class="col-md col-12">
                 <div class="row page-title shadow-lg">
@@ -50,34 +80,22 @@ if (!isset($_SESSION['matricule'])) {
                             </tr>
                         </thead>
                         <tbody>
-                            <?php
-                            // Assumez que $etudiants est un tableau d'étudiants avec leurs informations
-                            $etudiants = array(
-                                array("Nom1", "Matricule1", "Classe1"),
-                                array("Nom2", "Matricule2", "Classe2"),
-                                // Ajoutez d'autres étudiants ici
-                            );
-
-                            foreach ($etudiants as $index => $etudiant) {
-                                echo '<tr>';
-                                echo '<th scope="row">' . ($index + 1) . '</th>';
-                                echo '<td>' . $etudiant[0] . '</td>';
-                                echo '<td>' . $etudiant[1] . '</td>';
-                                echo '<td>' . $etudiant[2] . '</td>';
-                                echo '<td><input type="checkbox" name="present_' . $index . '" value="present"></td>';
-                                echo '<td><input type="checkbox" name="absent_' . $index . '" value="absent"></td>';
-                                echo '</tr>';
-                            }
-                            ?>
+                            <?php foreach ($etudiants as $index => $etudiant) : ?>
+                                <tr>
+                                    <th scope="row"><?= $index + 1 ?></th>
+                                    <td><?= $etudiant['nom'] ?></td>
+                                    <td><?= $etudiant['matricule'] ?></td>
+                                    <td><?= $etudiant['classe_nom'] ?></td>
+                                    <td><input type="checkbox" name="present_<?= $index ?>" value="present"></td>
+                                    <td><input type="checkbox" name="absent_<?= $index ?>" value="absent"></td>
+                                </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
-
             </div>
             <div class="col-md-2 border-start border-secondary">
-                <?php
-                    include '../templates/user-card.php';
-                ?>
+                <?php include '../templates/user-card.php'; ?>
             </div>
         </div>
     </div>

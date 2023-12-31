@@ -153,7 +153,7 @@ CREATE TABLE information_enseignant (
     utilisateur_matricule INT NOT NULL,
     specialite VARCHAR(255) NOT NULL,
     bureau VARCHAR(255),
-    classe_id INT,
+    classe_id INT DEFAULT NULL,
     PRIMARY KEY (utilisateur_matricule),
     FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule),
     FOREIGN KEY (classe_id) REFERENCES classe (id)

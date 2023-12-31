@@ -1,7 +1,5 @@
 <?php
-// Démarrez la session pour accéder aux variables de session
 session_start();
-
 include '../connexion.php';
 
 // Vérifier la connexion
@@ -32,16 +30,6 @@ function afficherBoutonsActions()
     echo '</div>';
 }
 
-// Requête SQL pour récupérer la liste des cours affectés à l'enseignant administrateur
-$sql = "SELECT c.id, c.nom, c.description, c.heures_attribuees FROM cours c
-        INNER JOIN attribution_cours ac ON c.id = ac.cours_id
-        INNER JOIN utilisateur u ON ac.utilisateur_matricule = u.matricule
-        WHERE u.matricule = :matricule";
-
-$stmt = $pdo->prepare($sql);
-$stmt->bindParam(':matricule', $_SESSION['matricule']);
-$stmt->execute();
-$cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
 <!doctype html>
 <html lang="fr">
@@ -78,34 +66,63 @@ $cours = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     ?>
                     <div class="table-responsive">
                         <table class="table table-striped">
-                            <!-- ... (en-tête du tableau) -->
+                            <thead>
+                                <tr>
+                                    <th scope="col">#</th>
+                                    <th scope="col">Nom du Cours</th>
+                                    <th scope="col">Description</th>
+                                    <th scope="col">Facultatif</th>
+                                    <th scope="col">Nom de la Classe</th>
+                                    <?php
+                                    // Ajouter une colonne pour les actions si l'utilisateur est administrateur
+                                    if ($isAdmin) {
+                                        echo '<th scope="col">Actions</th>';
+                                    }
+                                    ?>
+                                </tr>
+                            </thead>
                             <tbody>
-                                <?php
+                            <?php
                                 // Afficher la liste des cours
-                                if (empty($cours)) {
-                                    // Aucun cours trouvé dans la base de données
-                                    echo '<ul class="list-group" >';
-                                    echo '<li class="list-group-item text-center">Aucun cours existant.</li>';
-                                    echo '</ul>';
-                                } else {
-                                    foreach ($cours as $index => $coursInfo) {
-                                        echo '<tr>';
-                                        echo '<td>' . ($index + 1) . '</td>';
-                                        echo '<td>' . $coursInfo['nom'] . '</td>';
-                                        echo '<td>' . $coursInfo['description'] . '</td>';
-                                        echo '<td>' . $coursInfo['heures_attribuees'] . '</td>';
-                                        // Ajouter des boutons d'action pour un enseignant administrateur
-                                        if($isAdmin){
-                                            echo '<td>';
-                                            echo '<a href="modifier_cours.php?id=' . $coursInfo['id'] . '" class="btn btn-warning btn-sm">Modifier</a>';
-                                            echo ' ';
-                                            echo '<a href="supprimer_cours.php?id=' . $coursInfo['id'] . '" class="btn btn-danger btn-sm">Supprimer</a>';
-                                            echo '</td>';
+                                $sqlCours = "SELECT id, nom, description, facultatif, classe_id FROM cours";
+                                $resultCours = $conn->query($sqlCours);
+
+                                    if ($resultCours->num_rows > 0) {
+                                        while ($rowCours = $resultCours->fetch_assoc()) {
+                                            echo '<tr class="fs-5">';
+                                            echo '<th scope="row">' . $rowCours['id'] . '</th>';
+                                            echo '<td>' . $rowCours['nom'] . '</td>';
+                                            echo '<td>' . $rowCours['description'] . '</td>';
+                                            echo '<td>' . ($rowCours['facultatif'] ? 'Oui' : 'Non') . '</td>';
+
+                                            // Récupérer le nom de la classe associée
+                                            $classe_id = $rowCours['classe_id'];
+                                            $sqlNomClasse = "SELECT nom FROM classe WHERE id = $classe_id";
+                                            $resultNomClasse = $conn->query($sqlNomClasse);
+                                            $rowNomClasse = $resultNomClasse->fetch_assoc();
+
+                                            echo '<td>' . $rowNomClasse['nom'] . '</td>';
+
+                                            // Ajouter des boutons d'action si l'utilisateur est administrateur
+                                            if ($isAdmin) {
+                                                echo '<td>';
+                                                echo '<div class="btn-group" role="group" aria-label="Actions">';
+                                                echo '<button type="button" class="btn btn-warning">Modifier</button>';
+                                                echo '<button type="button" class="btn btn-danger">Supprimer</button>';
+                                                echo '</div>';
+                                                echo '</td>';
+                                            }
+
                                             echo '</tr>';
                                         }
+                                    } else {
+                                        // Aucun cours trouvé dans la base de données
+                                        echo '<tr>';
+                                        echo '<td colspan="6" class="text-center">Aucun cours existant.</td>';
+                                        echo '</tr>';
                                     }
-                                }
                                 ?>
+
                             </tbody>
                         </table>
                     </div>

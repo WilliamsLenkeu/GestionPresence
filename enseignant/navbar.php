@@ -1,3 +1,11 @@
+<?php
+if (!isset($_SESSION['matricule'])) {
+    // Redirige vers la page index.php du dossier parent
+    header('Location: ../logout.php');
+    exit;
+}
+?>
+
 <nav class="navbar navbar-expand-lg flex-column border-bottom border-secondary h-100">
     <div class="container-fluid">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
