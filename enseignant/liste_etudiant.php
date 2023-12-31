@@ -130,7 +130,7 @@ $etudiants = $result->fetch_all(MYSQLI_ASSOC);
                         </table>
                     <?php else : ?>
                         <ul class="list-group" >
-                            <li class="list-group-item text-center">Aucune etudiants existante.</li>
+                            <li class="list-group-item text-center">Aucune etudiants existants.</li>
                         </ul>
                     <?php endif; ?>
                 </div>

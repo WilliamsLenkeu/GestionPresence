@@ -11,11 +11,13 @@ if ($conn->connect_error) {
 $sqlEnseignants = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'enseignant'";
 $resultEnseignants = $conn->query($sqlEnseignants);
 
-
 // Récupérer la liste des élèves avec leurs informations de profil
 $sqlEleves = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant'";
 $resultEleves = $conn->query($sqlEleves);
 
+// Récupérer la liste des filières
+$sqlFilieres = "SELECT id, nom FROM filiere";
+$resultFilieres = $conn->query($sqlFilieres);
 
 // Gérer la soumission du formulaire d'ajout de cours
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -23,13 +25,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nomCours = $_POST["nom_cours"];
     $descriptionCours = $_POST["description_cours"];
     $heuresAttribuees = $_POST["heures_attribuees"];
+    $filiereId = $_POST["filiere_id"];
     $enseignants = isset($_POST["enseignants"]) ? $_POST["enseignants"] : [];
     $eleves = isset($_POST["eleves"]) ? $_POST["eleves"] : [];
 
     // Insérer le cours dans la table "cours"
-    $sqlInsertCours = "INSERT INTO cours (nom, description, heures_attribuees) VALUES (?, ?, ?)";
+    $sqlInsertCours = "INSERT INTO cours (nom, description, heures_attribuees, filiere_id) VALUES (?, ?, ?, ?)";
     $stmtInsertCours = $conn->prepare($sqlInsertCours);
-    $stmtInsertCours->bind_param("ssi", $nomCours, $descriptionCours, $heuresAttribuees);
+    $stmtInsertCours->bind_param("ssii", $nomCours, $descriptionCours, $heuresAttribuees, $filiereId);
     $stmtInsertCours->execute();
     $coursId = $stmtInsertCours->insert_id;
 
@@ -87,6 +90,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="mb-3">
                                 <label for="heures_attribuees" class="form-label">Heures attribuées</label>
                                 <input type="number" class="form-control" id="heures_attribuees" name="heures_attribuees" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="filiere_id" class="form-label">Filière</label>
+                                <select class="form-control" id="filiere_id" name="filiere_id" required>
+                                    <?php
+                                    while ($rowFiliere = $resultFilieres->fetch_assoc()) {
+                                        echo '<option value="' . $rowFiliere["id"] . '">' . $rowFiliere["nom"] . '</option>';
+                                    }
+                                    ?>
+                                </select>
                             </div>
                             <div class="mb-3">
                                 <label for="enseignants" class="form-label">Enseignants</label>
