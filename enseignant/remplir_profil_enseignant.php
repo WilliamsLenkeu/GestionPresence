@@ -38,10 +38,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     // Exécuter la requête pour la table profil
     if ($stmt_profil->execute()) {
-        // Enregistrement dans la table information_enseignant
-        $sql_info_enseignant = "INSERT INTO information_enseignant (utilisateur_matricule, specialite, bureau) VALUES (?, ?, ?)";
+        // Récupérer l'ID du profil inséré
+        $profil_id = $stmt_profil->insert_id;
+
+        // Enregistrement dans la table information_enseignant avec l'ajout de la classe_id
+        $sql_info_enseignant = "INSERT INTO information_enseignant (profil_id, specialite, bureau, classe_id) VALUES (?, ?, ?, ?)";
         $stmt_info_enseignant = $conn->prepare($sql_info_enseignant);
-        $stmt_info_enseignant->bind_param('sss', $matricule, $specialite, $bureau);
+
+        // Récupérer la classe_id à partir du formulaire
+        $classe_id = $_POST['classe_id'];
+
+        $stmt_info_enseignant->bind_param('ssss', $profil_id, $specialite, $bureau, $classe_id);
 
         // Exécuter la requête pour la table information_enseignant
         if ($stmt_info_enseignant->execute()) {
@@ -63,6 +70,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Fermer la connexion pour profil
     $stmt_profil->close();
 }
+
+// Récupérer la liste des classes depuis la base de données
+$sqlClasses = "SELECT id, nom FROM classe";
+$resultClasses = $conn->query($sqlClasses);
 
 // Fermer la connexion
 $conn->close();
@@ -140,6 +151,17 @@ $conn->close();
                 <div class="mb-3">
                     <label for="bureau" class="form-label">Bureau :</label>
                     <input type="text" name="bureau" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label for="classe_id" class="form-label">Classe :</label>
+                    <select class="form-select" name="classe_id" required>
+                        <?php
+                        // Afficher les options de classe
+                        while ($rowClasse = $resultClasses->fetch_assoc()) {
+                            echo '<option value="' . $rowClasse['id'] . '">' . $rowClasse['nom'] . '</option>';
+                        }
+                        ?>
+                    </select>
                 </div>
                 <button type="submit" class="btn btn-primary">Enregistrer</button>
             </form>
