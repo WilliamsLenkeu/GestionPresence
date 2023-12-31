@@ -28,12 +28,12 @@ CREATE TABLE session (
     FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule)
 );
 
--- Création de la table cours liée à une classe
+-- Table pour stocker les cours liés à une classe
 CREATE TABLE cours (
     id INT NOT NULL AUTO_INCREMENT,
     nom VARCHAR(255) NOT NULL,
     description TEXT,
-    heures_attribuees INT NOT NULL,
+    facultatif BOOLEAN NOT NULL,
     classe_id INT,
     PRIMARY KEY (id),
     FOREIGN KEY (classe_id) REFERENCES classe (id)

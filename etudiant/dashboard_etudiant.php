@@ -1,4 +1,54 @@
 <?php
+// Démarrez la session pour accéder aux variables de session
+session_start();
+
+// Vérifiez si le matricule est présent dans la session
+if (!isset($_SESSION['matricule'])) {
+    // Redirige vers la page logout.php du dossier parent
+    header('Location: ../logout.php');
+    exit;
+}
+
+// Vérifier si l'étudiant a un profil
+include '../connexion.php';
+
+$utilisateur_matricule = $_SESSION['matricule'];
+
+// Récupérer la classe de l'étudiant
+$sqlClasse = "SELECT classe_id FROM utilisateur WHERE matricule = ?";
+$stmtClasse = $conn->prepare($sqlClasse);
+$stmtClasse->bind_param("i", $utilisateur_matricule);
+$stmtClasse->execute();
+$stmtClasse->store_result();
+$stmtClasse->bind_result($classe_id);
+$stmtClasse->fetch();
+
+// Récupérer les cours non facultatifs de la classe de l'étudiant
+$sqlCours = "SELECT id FROM cours WHERE classe_id = ? AND facultatif = 0";
+$stmtCours = $conn->prepare($sqlCours);
+$stmtCours->bind_param("i", $classe_id);
+$stmtCours->execute();
+$resultCours = $stmtCours->get_result();
+
+// Insérer l'étudiant dans les cours qui ne sont pas facultatifs et auxquels il n'est pas déjà inscrit
+while ($cours = $resultCours->fetch_assoc()) {
+    $cours_id = $cours['id'];
+
+    // Vérifier si l'étudiant est déjà inscrit à ce cours
+    $sqlCheckInscription = "SELECT id FROM attribution_cours WHERE utilisateur_matricule = ? AND cours_id = ?";
+    $stmtCheckInscription = $conn->prepare($sqlCheckInscription);
+    $stmtCheckInscription->bind_param("ii", $utilisateur_matricule, $cours_id);
+    $stmtCheckInscription->execute();
+    $resultCheckInscription = $stmtCheckInscription->get_result();
+
+    // Si l'étudiant n'est pas déjà inscrit, l'insérer
+    if ($resultCheckInscription->num_rows == 0) {
+        $sqlInsertInscription = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
+        $stmtInsertInscription = $conn->prepare($sqlInsertInscription);
+        $stmtInsertInscription->bind_param("iii", $utilisateur_matricule, $cours_id, $classe_id);
+        $stmtInsertInscription->execute();
+    }
+}
 
 ?>
 
