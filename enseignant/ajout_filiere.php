@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmtAjoutFiliere->bind_param('ss', $nom, $description);
 
     if ($stmtAjoutFiliere->execute()) {
-        header('Location: liste_filieres.php'); // Rediriger après l'ajout de la filière
+        header('Location: liste_filiere.php'); // Rediriger après l'ajout de la filière
         exit;
     } else {
         echo 'Une erreur est survenue lors de l\'ajout de la filière. Veuillez réessayer.';
