@@ -84,12 +84,6 @@ $etudiants = $result->fetch_all(MYSQLI_ASSOC);
                         </select>
                     </div>
                 <?php endif; ?>
-                <?php
-                // Afficher les boutons d'actions pour un enseignant administrateur
-                if ($isAdmin) {
-                    afficherBoutonsActions();
-                }
-                ?>
 
                 <!-- Tableau responsive -->
                 <div class="table-responsive">
@@ -125,7 +119,7 @@ $etudiants = $result->fetch_all(MYSQLI_ASSOC);
                                     if ($isAdmin) {
                                         // Ajouter des boutons d'actions pour un enseignant administrateur
                                         echo '<td>';
-                                        echo '<a href="modifier_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-warning">Modifier</a>';
+                                        echo '<a href="modifier_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-warning me-3">Modifier</a>';
                                         echo '<a href="supprimer_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-danger" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer cet étudiant ?\')">Supprimer</a>';
                                         echo '</td>';
                                     }
@@ -136,7 +130,7 @@ $etudiants = $result->fetch_all(MYSQLI_ASSOC);
                         </table>
                     <?php else : ?>
                         <ul class="list-group" >
-                            <li class="list-group-item text-center">Aucune etudiants existante.</li>
+                            <li class="list-group-item text-center">Aucune etudiants existants.</li>
                         </ul>
                     <?php endif; ?>
                 </div>
