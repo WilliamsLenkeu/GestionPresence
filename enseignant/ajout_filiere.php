@@ -89,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <label for="description" class="form-label">Description :</label>
                                 <textarea class="form-control" name="description" rows="3" required></textarea>
                             </div>
-                            <button type="submit" class="btn btn-primary">Ajouter</button>
+                            <button type="submit" class="btn btn-primary btn-dark">Ajouter</button>
                         </form>
                     </div>
                 </div>
