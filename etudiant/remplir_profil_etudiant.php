@@ -7,6 +7,9 @@ if (!isset($_SESSION['matricule'])) {
     exit;
 }
 
+
+
+
 // Connexion à la base de données (à adapter selon votre configuration)
 include '../connexion.php';
 
@@ -19,6 +22,23 @@ if ($conn->connect_error) {
 
 // Récupérer le matricule de l'utilisateur depuis la session
 $matricule = $_SESSION['matricule'];
+
+// Vérifier si l'étudiant a déjà rempli son profil
+$sqlCheckProfil = "SELECT utilisateur_matricule FROM profil WHERE utilisateur_matricule = ?";
+$stmtCheckProfil = $conn->prepare($sqlCheckProfil);
+$stmtCheckProfil->bind_param('s', $matricule);
+$stmtCheckProfil->execute();
+$stmtCheckProfil->store_result();
+
+// Si des données existent, rediriger vers le tableau de bord de l'étudiant
+if ($stmtCheckProfil->num_rows > 0) {
+    header('Location: dashboard_etudiant.php');
+    exit;
+}
+
+// Fermer la déclaration
+$stmtCheckProfil->close();
+
 
 // Vérifier si le formulaire a été soumis
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -49,7 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $conn->commit();
 
         // Rediriger vers le tableau de bord de l'étudiant
-        header('Location: tableau_de_bord_etudiant.php');
+        header('Location: dashboard_etudiant.php');
         exit;
     } else {
         // Annuler les changements en cas d'échec
@@ -74,19 +94,57 @@ $conn->close();
 <html lang="fr">
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Remplir Profil Étudiant</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Remplir Profil Enseignant</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-    <link rel="stylesheet" href="../css/style.css" type="text/css" />
-    <link rel="icon" href="../image/logo.jpg" type="image/x-icon">
+    <style>
+        body {
+            background-image: url('../image/background.jpeg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .blur-background {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+        }
+
+        .form-container {
+            max-width: 400px;
+        }
+
+        .form-label,
+        .form-control {
+            color: #444;
+        }
+
+        .btn-primary {
+            background-color: #444;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #666;
+        }
+    </style>
 </head>
 
+
 <body class="fw-bold">
-    <div class="container-fluid dash">
+    <div class="container-fluid dash d-flex justify-content-center align-items-center vh-100">
         <!-- Ajoutez votre formulaire ici -->
-        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="blur-background form-container">
             <!-- Insérez ici les champs du formulaire (nom, prénom, date de naissance, filière, etc.) -->
+            <h2 class="mb-4 text-center">Remplir le Profil etudiant</h2>
             <div class="mb-3">
                 <label for="nom" class="form-label">Nom :</label>
                 <input type="text" class="form-control" name="nom" required>
@@ -116,6 +174,23 @@ $conn->close();
 
     <!-- Bootstrap Script -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+     <!-- Validation Script -->
+     <script>
+        // Désactiver la validation native du formulaire
+        (function () {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.from(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+    </script>
 </body>
 
 </html>

@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             // Rediriger en fonction du rôle
             switch ($role) {
                 case 'etudiant':
-                    header('Location: tableau_de_bord_etudiant.php');
+                    header('Location: ./etudiant/remplir_profil_etudiant.php');
                     exit;
                     break;
 
