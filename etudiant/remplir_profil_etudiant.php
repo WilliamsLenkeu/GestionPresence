@@ -21,7 +21,7 @@ if ($conn->connect_error) {
 $matricule = $_SESSION['matricule'];
 
 // Vérifier si l'étudiant a déjà rempli son profil
-$sqlCheckProfil = "SELECT utilisateur_matricule FROM profil WHERE utilisateur_matricule = ?";
+$sqlCheckProfil = "SELECT utilisateur_matricule FROM information_etudiant WHERE utilisateur_matricule = ?";
 $stmtCheckProfil = $conn->prepare($sqlCheckProfil);
 $stmtCheckProfil->bind_param('s', $matricule);
 $stmtCheckProfil->execute();
@@ -47,20 +47,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Utilisation d'une transaction pour s'assurer que les deux requêtes réussissent ou échouent ensemble
     $conn->begin_transaction();
 
-    // Insérer des données dans la table profil
-    $sqlProfil = "INSERT INTO profil (utilisateur_matricule, nom, prenom, date_naissance) VALUES (?, ?, ?, ?)";
+    // Insérer des données dans la table information_etudiant
+    $sqlProfil = "INSERT INTO information_etudiant (utilisateur_matricule, nom, prenom, date_naissance, classe_id) VALUES (?, ?, ?, ?, ?)";
     $stmtProfil = $conn->prepare($sqlProfil);
-    $stmtProfil->bind_param('ssss', $matricule, $nom, $prenom, $date_naissance);
+    $stmtProfil->bind_param('sssss', $matricule, $nom, $prenom, $date_naissance, $classe_id);
     $profilSuccess = $stmtProfil->execute();
 
-    // Insérer des données dans la table information_etudiant
-    $sqlInfoEtudiant = "INSERT INTO information_etudiant (utilisateur_matricule, classe_id) VALUES (?, ?)";
-    $stmtInfoEtudiant = $conn->prepare($sqlInfoEtudiant);
-    $stmtInfoEtudiant->bind_param('ss', $matricule, $classe_id);
-    $infoEtudiantSuccess = $stmtInfoEtudiant->execute();
 
     // Vérifier si les deux requêtes ont réussi
-    if ($profilSuccess && $infoEtudiantSuccess) {
+    if ($profilSuccess ) {
         // Valider les changements
         $conn->commit();
 
