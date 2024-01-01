@@ -14,7 +14,7 @@ include '../connexion.php';
 
 $matricule = $_SESSION['matricule'];
 
-$sql = "SELECT * FROM profil WHERE utilisateur_matricule = ?";
+$sql = "SELECT * FROM information_enseignant WHERE utilisateur_matricule = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $matricule);
 $stmt->execute();
@@ -58,7 +58,7 @@ if ($stmt->num_rows == 0) {
                 <div class="row mt-4 fw-normal">
                     <?php
                     // Liste des tables à afficher
-                    $tables = array("utilisateur", "session", "cours", "session_academique", "justificatif", "notification", "classe");
+                    $tables = array("utilisateur", "cours", "classe");
 
                     // Parcourir les tables et afficher un résumé sous forme de carte pour chaque table
                     foreach ($tables as $table) {

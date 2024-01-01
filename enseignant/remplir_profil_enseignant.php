@@ -32,35 +32,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $bureau = $_POST['bureau'];
 
     // Utilisation d'une requête préparée pour éviter les attaques par injection SQL
-    $sql_profil = "INSERT INTO profil (utilisateur_matricule, nom, prenom, date_naissance) VALUES (?, ?, ?, ?)";
+    $sql_profil = "INSERT INTO information_enseignant(utilisateur_matricule, nom, prenom, date_naissance,specialite, bureau) VALUES (?, ?, ?, ?,?,?)";
     $stmt_profil = $conn->prepare($sql_profil);
-    $stmt_profil->bind_param('ssss', $matricule, $nom, $prenom, $date_naissance);
+    $stmt_profil->bind_param('ssssss', $matricule, $nom, $prenom, $date_naissance,$specialite, $bureau);
 
     // Exécuter la requête pour la table profil
     if ($stmt_profil->execute()) {
-        // Récupérer l'ID du profil inséré
-        $profil_id = $stmt_profil->insert_id;
-
-        // Enregistrement dans la table information_enseignant sans l'ajout de la classe_id
-        $sql_info_enseignant = "INSERT INTO information_enseignant (utilisateur_matricule, specialite, bureau) VALUES (?, ?, ?)";
-        $stmt_info_enseignant = $conn->prepare($sql_info_enseignant);
-        $stmt_info_enseignant->bind_param('sss', $matricule, $specialite, $bureau);
-
-        // Exécuter la requête pour la table information_enseignant
-        if ($stmt_info_enseignant->execute()) {
-            // Rediriger vers le tableau de bord de l'enseignant après l'insertion
-            header('Location: dashboard_enseignant.php');
-            exit;
-        } else {
-            // Gérer les erreurs d'insertion pour information_enseignant
-            echo 'Erreur lors de l\'insertion dans la table information_enseignant : ' . $stmt_info_enseignant->error;
-        }
-
-        // Fermer la connexion pour information_enseignant
-        $stmt_info_enseignant->close();
+        // Rediriger vers le tableau de bord de l'enseignant après l'insertion
+        header('Location: dashboard_enseignant.php');
+        exit;
     } else {
-        // Gérer les erreurs d'insertion pour profil
-        echo 'Erreur lors de l\'insertion dans la table profil : ' . $stmt_profil->error;
+        // Gérer les erreurs d'insertion pour information_enseignant
+        echo 'Erreur lors de l\'insertion dans la table information_enseignant : ' . $stmt_info_enseignant->error;
     }
 
     // Fermer la connexion pour profil

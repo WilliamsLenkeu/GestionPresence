@@ -1,65 +1,8 @@
 <?php
-// Démarrez la session pour accéder aux variables de session
-session_start();
-
-// Vérifiez si le matricule est présent dans la session
-if (!isset($_SESSION['matricule'])) {
-    // Redirige vers la page logout.php du dossier parent
-    header('Location: ../logout.php');
-    exit;
-}
-
-// Vérifier si l'étudiant a un profil
-include '../connexion.php';
-
-$utilisateur_matricule = $_SESSION['matricule'];
-
-// Récupérer la classe de l'étudiant
-$sqlClasse = "SELECT classe_id FROM utilisateur WHERE matricule = ?";
-$stmtClasse = $conn->prepare($sqlClasse);
-$stmtClasse->bind_param("i", $utilisateur_matricule);
-$stmtClasse->execute();
-$stmtClasse->store_result();
-$stmtClasse->bind_result($classe_id);
-$stmtClasse->fetch();
-
-// Vérifier les cours non facultatifs de la classe
-$sqlCoursNonFacultatifs = "SELECT id FROM cours WHERE classe_id = ? AND facultatif = 0";
-$stmtCoursNonFacultatifs = $conn->prepare($sqlCoursNonFacultatifs);
-$stmtCoursNonFacultatifs->bind_param("i", $classe_id);
-$stmtCoursNonFacultatifs->execute();
-$resultCoursNonFacultatifs = $stmtCoursNonFacultatifs->get_result();
-echo '<script>alert("Test1");</script>';
-
-// Vérifier et inscrire l'étudiant à chaque cours non facultatif s'il n'est pas déjà inscrit
-while ($rowCours = $resultCoursNonFacultatifs->fetch_assoc()) {
-    echo '<script>alert("Test2");</script>';
-    $cours_id = $rowCours['id'];
-
-    // Vérifier si l'étudiant n'est pas déjà inscrit au cours
-    $sqlVerificationInscription = "SELECT COUNT(*) FROM attribution_cours WHERE utilisateur_matricule = ? AND cours_id = ?";
-    $stmtVerificationInscription = $conn->prepare($sqlVerificationInscription);
-    $stmtVerificationInscription->bind_param("ii", $utilisateur_matricule, $cours_id);
-    $stmtVerificationInscription->execute();
-    $stmtVerificationInscription->bind_result($countInscription);
-    $stmtVerificationInscription->fetch();
-
-    // Si l'étudiant n'est pas déjà inscrit, l'inscrire
-    if ($countInscription == 0) {
-        // Inscrire l'étudiant au cours
-        $sqlInscription = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
-        $stmtInscription = $conn->prepare($sqlInscription);
-        $stmtInscription->bind_param("iii", $utilisateur_matricule, $cours_id, $classe_id);
-        $stmtInscription->execute();
-    }else{
-        echo '<script>alert("Test");</script>';
-    }
-}
-
-$stmtCoursNonFacultatifs->close();
-$stmtClasse->close();
-$conn->close();
 ?>
+
+<!DOCTYPE html>
+<html lang="fr">
 
 <!DOCTYPE html>
 <html lang="fr">
@@ -67,57 +10,70 @@ $conn->close();
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tableau de Bord - Etudiant</title>
+    <title>Study Check 📚</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
     <link rel="stylesheet" href="./css/style.css" type="text/css" />
-    <link rel="stylesheet" href="../css/style.css" type="text/css" />
+    <link rel="icon" href="./image/logo.jpg" type="image/x-icon">
     <style>
         body {
-            font-family: 'Helvetica', sans-serif;
-        }
-        .navbar-brand {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .navbar-brand img {
-            margin-right: 10px;
-            height: 90px;
-            width: 90px;
-            object-fit: cover;
+            background-image: url('./image/background.jpeg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
-        .navbar-light .navbar-nav .nav-link {
-            color: #fff;
+        .navbar {
+            border-bottom: 0.5px solid ;
         }
 
-        .navbar-light .navbar-toggler-icon {
-            background-color: #fff;
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            backdrop-filter: blur(10px);
         }
 
-        .dash-1 {
-            padding: 20px 0;
+        .card-header {
+            background-color: rgb(68, 68, 68);
+            color: #FFF;
+            border-radius: 20px;
+            border-bottom: none;
         }
 
-        
-
-        .shadow-none {
-            box-shadow: none;
+        .logo-form {
+            max-width: 200px;
+            margin-bottom: 15px;
+            /* border: 2px solid red; */
         }
 
-        .border-secondary {
-            border-color: #d3d3d3;
+        .btn-group button {
+            background-color: #444;
+            color: #FFF;
+            border: none;
         }
 
-        .user-card {
-            background-color: #fff;
-            border: 1px solid #d3d3d3;
-            border-radius: 8px;
-            padding: 15px;
+        .btn-group .active {
+            background-color: #FFF;
+            color: #444;
+        }
+
+        .form-label,
+        .form-control {
+            color: #444;
+        }
+
+        .btn-primary {
+            background-color: #444;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #666;
         }
     </style>
-
-    <link rel="icon" href="../image/logo.jpg" type="image/x-icon">
 </head>
 
 <body class="fw-bold">
@@ -128,26 +84,21 @@ $conn->close();
             <div class="container-fluid">
                 <!-- Logo -->
                 <a class="navbar-brand" href="#">
-                    <img src="../image/logo-banner.jpg" alt="Logo">
+                    <img src="../image/logo-banner.jpg" alt="Logo" width="30%">
+                    <span class="xxl" style="font-size: 200%;">study check</span>
+                    <span class="lead" style="font-size: 80%;">(Gerez, suivez, excellez)</span>
                 </a>
             </div>
         </nav>
 
+
+
         <!-- Section du tableau de bord -->
         <div class="row dash-1">
-            <div class="col-md-4 text-center">
+            <div class="col-md col-12 text-center">
                 <?php
                 include './navbar.php';
                 ?>
-            </div>
-            <div class="col-md col-12 ">
-                <div class="row shadow-none card-header">
-                    <div class="fs-2 mt-3 card-title"> Informations étudiants </div>
-                </div>
-                <div class="row mt-4 fw-normal">
-                    <!-- Contenu du tableau de bord -->
-                    
-                </div>
             </div>
             <!-- Colonne de droite pour les informations de l'utilisateur -->
             <div class="col-md-2 border-start border-secondary">

@@ -29,7 +29,7 @@ function afficherBoutonsActions()
 
 $sql = "SELECT u.matricule, p.nom, p.prenom, p.date_naissance, ie.classe_id
         FROM utilisateur u
-        JOIN profil p ON u.matricule = p.utilisateur_matricule
+        JOIN information_etudiant p ON u.matricule = p.utilisateur_matricule
         LEFT JOIN information_etudiant ie ON u.matricule = ie.utilisateur_matricule
         LEFT JOIN attribution_cours ac ON u.matricule = ac.utilisateur_matricule
         LEFT JOIN cours c ON ac.cours_id = c.id
