@@ -4,6 +4,24 @@ if (!isset($_SESSION['matricule'])) {
     header('Location: ../logout.php');
     exit;
 }
+
+// Utilisation d'une requête préparée pour éviter les attaques par injection SQL
+$sql = "SELECT administrateur FROM utilisateur WHERE matricule = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param('s', $_SESSION['matricule']);
+$stmt->execute();
+$stmt->store_result();
+
+// Vérifier si l'utilisateur est administrateur
+$isAdmin = false;
+if ($stmt->num_rows > 0) {
+    $stmt->bind_result($adminStatus);
+    $stmt->fetch();
+    $isAdmin = $adminStatus == 1;
+}
+
+$isAdmin = $_SESSION['administrateur'] ?? 0; // Par défaut, considère que l'utilisateur n'est pas administrateur
+
 ?>
 
 <nav class="navbar navbar-expand-lg flex-column border-bottom border-secondary h-100">
@@ -27,6 +45,18 @@ if (!isset($_SESSION['matricule'])) {
                         Dashboard
                     </a>
                 </li>
+                <?php if ($isAdmin == 1) : ?>
+                    <!-- Ajoutez ce bouton uniquement si l'utilisateur est un administrateur -->
+                    <li class="nav-item btn btn-outline-secondary my-2 shadow-sm">
+                        <a class="nav-link" href="./page_administrateur.php">
+                            <svg class="mb-1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
+                                <path d="M3.13 9a6.002 6.002 0 0 1 10.742 0h1.414a8 8 0 0 0-12.156 0H3.129zM8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
+                                <path d="M8 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
+                            </svg>
+                            Utilisateur
+                        </a>
+                    </li>
+                <?php endif; ?>
                 <li class="nav-item btn btn-outline-secondary my-2 shadow-sm">
                     <a class="nav-link" href="./appel.php">
                         <svg class="mb-1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-card-checklist" viewBox="0 0 16 16">
@@ -63,14 +93,6 @@ if (!isset($_SESSION['matricule'])) {
                     </a>
                 </li>
             </ul>
-            <!-- <form class="d-flex" role="search">
-                <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                <button class="btn btn-dark" type="submit">
-                    <svg class="m-auto" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                        <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                    </svg>
-                </button>
-            </form> -->
         </div>
     </div>
 </nav>
