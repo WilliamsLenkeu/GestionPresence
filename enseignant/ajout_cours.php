@@ -8,11 +8,11 @@ if ($conn->connect_error) {
 }
 
 // Récupérer la liste des enseignants
-$sqlEnseignants = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'enseignant'";
+$sqlEnseignants = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN information_enseignant p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'enseignant'";
 $resultEnseignants = $conn->query($sqlEnseignants);
 
 // Récupérer la liste des élèves avec leurs informations de profil
-$sqlEleves = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN profil p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant'";
+$sqlEleves = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN information_etudiant p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant'";
 $resultEleves = $conn->query($sqlEleves);
 
 // Récupérer la liste des classes
