@@ -17,7 +17,7 @@ if (isset($_SESSION['matricule'])) {
     // Utilisation d'une requête préparée pour éviter les attaques par injection SQL
     $sql = "SELECT u.matricule, u.username, p.nom, p.prenom, p.date_naissance, u.role
             FROM utilisateur u
-            JOIN profil p ON u.matricule = p.utilisateur_matricule
+            JOIN information_enseignant p ON u.matricule = p.utilisateur_matricule
             WHERE u.matricule = ? LIMIT 1";
     
     $stmt = $conn->prepare($sql);

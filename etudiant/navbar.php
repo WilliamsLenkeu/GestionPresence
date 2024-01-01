@@ -34,13 +34,13 @@ $stmtNomClasse->fetch();
 $stmtNomClasse->close();
 
 // Récupérer tous les ID des cours suivis par l'élève
-$sqlListeCours = "SELECT cours.id
-    FROM cours 
-    JOIN attribution_cours ac ON ac.cours_id = cours.id
-    WHERE ac.classe_id = ? AND ac.utilisateur_matricule = ? 
-    ";
+$sqlListeCours = "SELECT c.id
+    FROM attribution_cours ac
+    JOIN cours c ON ac.cours_id = c.id
+    JOIN utilisateur u ON ac.utilisateur_matricule = u.matricule
+    WHERE u.matricule = ?";
 $stmtListeCours = $conn->prepare($sqlListeCours);
-$stmtListeCours->bind_param("is", $classeId, $matricule);
+$stmtListeCours->bind_param("i", $matricule);
 $stmtListeCours->execute();
 $resultListeCours = $stmtListeCours->get_result();
 ?>
