@@ -11,7 +11,7 @@ if (!isset($_SESSION['matricule'])) {
 // Vérifier si l'utilisateur est administrateur
 $sqlAdmin = "SELECT administrateur FROM utilisateur WHERE matricule = ?";
 $stmtAdmin = $conn->prepare($sqlAdmin);
-$stmtAdmin->bind_param('s', $_SESSION['matricule']);
+$stmtAdmin->bind_param('i', $_SESSION['matricule']);
 $stmtAdmin->execute();
 $stmtAdmin->store_result();
 
@@ -44,12 +44,12 @@ if (isset($_GET['id'])) {
         $stmtSupprimerPlanning->execute();
         $stmtSupprimerPlanning->close();
 
-        // Supprimer les enregistrements d'assiduité liés
-        $sqlSupprimerAssiduite = "DELETE FROM enregistrement_assiduite WHERE cours_id = ?";
-        $stmtSupprimerAssiduite = $conn->prepare($sqlSupprimerAssiduite);
-        $stmtSupprimerAssiduite->bind_param('i', $coursId);
-        $stmtSupprimerAssiduite->execute();
-        $stmtSupprimerAssiduite->close();
+        // Supprimer les enregistrements de présence liés
+        $sqlSupprimerPresence = "DELETE FROM presence WHERE cours_id = ?";
+        $stmtSupprimerPresence = $conn->prepare($sqlSupprimerPresence);
+        $stmtSupprimerPresence->bind_param('i', $coursId);
+        $stmtSupprimerPresence->execute();
+        $stmtSupprimerPresence->close();
 
         // Supprimer le cours lui-même
         $sqlSupprimerCours = "DELETE FROM cours WHERE id = ?";

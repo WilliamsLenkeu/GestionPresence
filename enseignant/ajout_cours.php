@@ -11,10 +11,6 @@ if ($conn->connect_error) {
 $sqlEnseignants = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN information_enseignant p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'enseignant'";
 $resultEnseignants = $conn->query($sqlEnseignants);
 
-// Récupérer la liste des élèves avec leurs informations de profil
-$sqlEleves = "SELECT u.matricule, u.username, p.prenom, p.nom FROM utilisateur u INNER JOIN information_etudiant p ON u.matricule = p.utilisateur_matricule WHERE u.role = 'etudiant'";
-$resultEleves = $conn->query($sqlEleves);
-
 // Récupérer la liste des classes
 $sqlClasses = "SELECT id, nom FROM classe";
 $resultClasses = $conn->query($sqlClasses);
@@ -39,9 +35,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Associer les enseignants au cours dans la table "attribution_cours"
     foreach ($enseignants as $enseignant) {
-        $sqlInsertAttribution = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id, classe_id) VALUES (?, ?, ?)";
+        $sqlInsertAttribution = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id) VALUES (?, ?)";
         $stmtInsertAttribution = $conn->prepare($sqlInsertAttribution);
-        $stmtInsertAttribution->bind_param("iii", $enseignant, $coursId, $classeId);
+        $stmtInsertAttribution->bind_param("ii", $enseignant, $coursId);
         $stmtInsertAttribution->execute();
     }
 
@@ -115,7 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             </div>
             <div class="col-md-2 border-start border-secondary">
-                <?php include '../templates/user-card.php'; ?>
+                <?php include './user-card.php'; ?>
             </div>
         </div>
     </div>

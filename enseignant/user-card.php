@@ -19,10 +19,10 @@ if ($conn->connect_error) {
 // Récupérer le matricule de l'utilisateur connecté
 $matricule = $_SESSION['matricule'];
 
-// Préparez la requête pour récupérer les informations de l'étudiant
-$infoQuery = "SELECT ie.nom, ie.prenom, ie.date_naissance, ie.classe_id, c.nom AS nom_classe
-              FROM information_etudiant ie
-              LEFT JOIN classe c ON ie.classe_id = c.id
+// Préparez la requête pour récupérer les informations de l'enseignant
+$infoQuery = "SELECT ie.specialite, ie.nom, ie.prenom, ie.date_naissance, ie.bureau, c.nom AS nom_cours
+              FROM information_enseignant ie
+              LEFT JOIN cours c ON ie.cours_id = c.id
               WHERE ie.utilisateur_matricule = ?";
 
 // Préparez et exécutez la requête
@@ -34,7 +34,7 @@ $infoStmt->store_result();
 // Vérifiez si le matricule a été trouvé dans la base de données
 if ($infoStmt->num_rows > 0) {
     // Liaison des résultats de la requête aux variables
-    $infoStmt->bind_result($nom, $prenom, $dateNaissance, $classeId, $nomClasse);
+    $infoStmt->bind_result($specialite, $nom, $prenom, $dateNaissance, $bureau, $nomCours);
     $infoStmt->fetch();
 } else {
     // Matricule non trouvé, afficher une alerte d'erreur avec Bootstrap
@@ -49,16 +49,17 @@ $conn->close();
 <!-- Le reste de votre code HTML peut maintenant utiliser les variables récupérées -->
 <div class="card my-3 shadow-sm">
     <div class="card-header">
-        <h5 class="card-title mb-0">Informations Utilisateur</h5>
+        <h5 class="card-title mb-0">Informations Enseignant</h5>
     </div>
     <div class="card-body">
-        <!-- Afficher les détails de l'utilisateur ici -->
+        <!-- Afficher les détails de l'enseignant ici -->
         <p class="card-text">Matricule: <?php echo $matricule; ?></p>
         <p class="card-text">Nom: <?php echo htmlspecialchars($nom); ?></p>
         <p class="card-text">Prénom: <?php echo htmlspecialchars($prenom); ?></p>
         <p class="card-text">Date de Naissance: <?php echo $dateNaissance; ?></p>
-        <p class="card-text">Rôle: <?php echo $_SESSION['role']; ?></p>
-        <p class="card-text">Classe: <?php echo ($classeId) ? htmlspecialchars($nomClasse) : "Non assignée"; ?></p>
+        <p class="card-text">Spécialité: <?php echo htmlspecialchars($specialite); ?></p>
+        <p class="card-text">Bureau: <?php echo htmlspecialchars($bureau); ?></p>
+        <p class="card-text">Cours: <?php echo ($nomCours) ? htmlspecialchars($nomCours) : "Non assigné"; ?></p>
     </div>
     <div class="card-footer bg-transparent border-top-0">
         <div class="container ">
