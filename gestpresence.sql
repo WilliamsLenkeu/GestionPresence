@@ -36,6 +36,15 @@ CREATE TABLE jour_semaine (
     PRIMARY KEY (id)
 );
 
+INSERT INTO jour_semaine (nom_jour) VALUES
+    ('Lundi'),
+    ('Mardi'),
+    ('Mercredi'),
+    ('Jeudi'),
+    ('Vendredi'),
+    ('Samedi'),
+    ('Dimanche');
+
 -- Table de liaison entre cours et jours de la semaine
 CREATE TABLE planning_cours_jour (
     id INT NOT NULL AUTO_INCREMENT,
