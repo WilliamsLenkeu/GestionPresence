@@ -34,9 +34,8 @@ $stmtNomClasse->fetch();
 $stmtNomClasse->close();
 
 // Récupérer tous les ID des cours suivis par l'élève
-$sqlListeCours = "SELECT c.id
+$sqlListeCours = "SELECT ac.id
     FROM attribution_cours ac
-    JOIN cours c ON ac.cours_id = c.id
     JOIN utilisateur u ON ac.utilisateur_matricule = u.matricule
     WHERE u.matricule = ?";
 $stmtListeCours = $conn->prepare($sqlListeCours);
@@ -65,11 +64,10 @@ $resultListeCours = $stmtListeCours->get_result();
                 // Calculer les heures d'absence pour chaque cours
                 while ($row = $resultListeCours->fetch_assoc()) {
 
-                    $sqlInfos = "SELECT c.nom, COALESCE(SUM(pc.heure_fin - pc.heure_debut), 0) as heure_absence, j.motif
+                    $sqlInfos = "SELECT c.nom, COALESCE(SUM(pc.heure_fin - pc.heure_debut), 0) as heure_absence, p.justificatif
                         FROM cours c
                         JOIN planning_cours pc ON c.id = pc.cours_id
-                        JOIN enregistrement_assiduite ea ON ea.cours_id = c.id 
-                        LEFT JOIN justificatif j ON j.enregistrement_assiduite_id = ea.id AND j.utilisateur_matricule = ea.utilisateur_matricule
+                        JOIN Presence p ON p.cours_id = c.id 
                         WHERE ea.present = 0 AND c.id = ? AND ea.utilisateur_matricule = ?
                         ";
 
