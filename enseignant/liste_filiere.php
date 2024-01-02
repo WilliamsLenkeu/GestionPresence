@@ -95,6 +95,7 @@ $classes = $result->fetch_all(MYSQLI_ASSOC);
                                         echo '<td>' . ($index + 1) . '</td>';
                                         echo '<td>' . $classeInfo['nom'] . '</td>';
                                         echo '<td>' . $classeInfo['description'] . '</td>';
+                                        echo '<td><a href="liste_cours.php?id_classe=' . $classeInfo['id'] . '" class="btn btn-info btn-sm">Cours</a></td>';
                                         // Ajouter des boutons d'action pour un administrateur
                                         if($isAdmin){
                                             echo '<td>';

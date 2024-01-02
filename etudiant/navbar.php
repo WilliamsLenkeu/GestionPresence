@@ -1,5 +1,4 @@
 <?php
-
 if (!isset($_SESSION['matricule'])) {
     header('Location: ../logout.php');
     exit;
@@ -33,10 +32,9 @@ $stmtNomClasse->fetch();
 $stmtNomClasse->close();
 
 // Récupérer tous les ID des cours suivis par l'élève
-$sqlListeCours = "SELECT c.id
+$sqlListeCours = "SELECT ac.cours_id
     FROM attribution_cours ac
     JOIN utilisateur u ON ac.utilisateur_matricule = u.matricule
-    JOIN cours c ON ac.cours_id = c.id
     WHERE u.matricule = ?";
 $stmtListeCours = $conn->prepare($sqlListeCours);
 $stmtListeCours->bind_param("i", $matricule);
@@ -63,16 +61,17 @@ $resultListeCours = $stmtListeCours->get_result();
                 $sommeAbsence = 0;
                 // Calculer les heures d'absence pour chaque cours
                 while ($row = $resultListeCours->fetch_assoc()) {
-                    $sqlInfos = "SELECT c.nom, COALESCE(SUM(TIME_TO_SEC(TIMEDIFF(pc.heure_fin, pc.heure_debut)) / 3600), 0) as heure_absence, p.justificatif
-                        FROM cours c
-                        JOIN planning_cours pc ON c.id = pc.cours_id
-                        LEFT JOIN presence p ON p.cours_id = c.id AND p.utilisateur_matricule = ?
-                        WHERE c.id = ? and p.present=0
-                        GROUP BY c.id
-                        ";
+                    $sqlInfos = "SELECT c.nom, 
+                    COALESCE(SUM(TIME_TO_SEC(TIMEDIFF(pcj.heure_fin, pcj.heure_debut)) / 3600), 0) as heure_absence, 
+                    p.justificatif
+                                FROM cours c
+                                JOIN planning_cours_jour pcj ON c.id = pcj.cours_id
+                                LEFT JOIN presence p ON p.cours_id = c.id AND p.utilisateur_matricule = ?
+                                WHERE c.id = ? AND p.present = 0
+                                GROUP BY c.id";
 
                     $stmtInfos = $conn->prepare($sqlInfos);
-                    $stmtInfos->bind_param("ii", $matricule, $row['id']);
+                    $stmtInfos->bind_param("ii", $matricule, $row['cours_id']);
                     $stmtInfos->execute();
                     $resultInfos = $stmtInfos->get_result();
                     $infoRow = $resultInfos->fetch_assoc();

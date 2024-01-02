@@ -27,13 +27,11 @@ function afficherBoutonsActions()
     echo '</div>';
 }
 
-$sql = "SELECT u.matricule, p.nom, p.prenom, p.date_naissance, ie.classe_id, cl.nom AS nom_classe
+$sql = "SELECT u.matricule, p.nom, p.prenom, p.date_naissance, ie.classe_id, c.nom AS nom_classe
         FROM utilisateur u
         JOIN information_etudiant p ON u.matricule = p.utilisateur_matricule
         LEFT JOIN information_etudiant ie ON u.matricule = ie.utilisateur_matricule
-        LEFT JOIN attribution_cours ac ON u.matricule = ac.utilisateur_matricule
-        LEFT JOIN cours c ON ac.cours_id = c.id
-        LEFT JOIN classe cl ON ie.classe_id = cl.id
+        LEFT JOIN classe c ON ie.classe_id = c.id
         WHERE u.role = 'etudiant'";
 $result = $conn->query($sql);
 
@@ -109,8 +107,8 @@ $etudiants = $result->fetch_all(MYSQLI_ASSOC);
                                     echo '<td>' . $etudiant['nom_classe'] . '</td>'; // Afficher le nom de la classe
                                     if ($isAdmin) {
                                         echo '<td>';
-                                        echo '<a href="modifier_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-warning me-3">Modifier</a>';
-                                        echo '<a href="supprimer_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-danger" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer cet étudiant ?\')">Supprimer</a>';
+                                        echo '<a href="modifier_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-warning me-3 btn-sm">Modifier</a>';
+                                        echo '<a href="supprimer_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-danger btn-sm" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer cet étudiant ?\')">Supprimer</a>';
                                         echo '</td>';
                                     }
                                     echo '</tr>';

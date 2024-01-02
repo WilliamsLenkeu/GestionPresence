@@ -38,11 +38,12 @@ if (isset($_GET['id'])) {
         $stmtSupprimerAttribution->close();
 
         // Supprimer les plannings de cours liés
-        $sqlSupprimerPlanning = "DELETE FROM planning_cours WHERE cours_id = ?";
+        $sqlSupprimerPlanning = "DELETE FROM planning_cours_jour WHERE cours_id = ?";
         $stmtSupprimerPlanning = $conn->prepare($sqlSupprimerPlanning);
         $stmtSupprimerPlanning->bind_param('i', $coursId);
         $stmtSupprimerPlanning->execute();
         $stmtSupprimerPlanning->close();
+
 
         // Supprimer les enregistrements de présence liés
         $sqlSupprimerPresence = "DELETE FROM presence WHERE cours_id = ?";
@@ -59,16 +60,16 @@ if (isset($_GET['id'])) {
         $stmtSupprimerCours->close();
 
         // Rediriger vers la liste des cours après la suppression
-        header('Location: liste_cours.php');
+        header('Location: liste_filiere.php');
         exit;
     } else {
         // Rediriger vers la liste des cours avec un message d'erreur si l'utilisateur n'est pas administrateur
-        header('Location: liste_cours.php?error=1');
+        header('Location: liste_filiere.php?error=1');
         exit;
     }
 } else {
     // Rediriger vers la liste des cours si l'ID du cours n'est pas défini
-    header('Location: liste_cours.php');
+    header('Location: liste_filiere.php');
     exit;
 }
 ?>

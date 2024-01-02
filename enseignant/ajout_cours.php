@@ -27,7 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $facultatif = isset($_POST["facultatif"]) ? 1 : 0;
 
     // Récupérer les données de date et heures
-    // $dateCours = $_POST["date_cours"];
     $heureDebut = $_POST["heure_debut"];
     $heureFin = $_POST["heure_fin"];
 
@@ -49,14 +48,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Insérer les données de date et heures dans la table "planning_cours_jour"
     $joursSemaine = isset($_POST["jours_semaine"]) ? $_POST["jours_semaine"] : [];
     foreach ($joursSemaine as $jour) {
-        $sqlInsertPlanning = "INSERT INTO planning_cours_jour (cours_id, jour_id, date_cours, heure_debut, heure_fin) VALUES (?, ?, ?, ?, ?)";
+        $sqlInsertPlanning = "INSERT INTO planning_cours_jour (cours_id, jour_id, heure_debut, heure_fin) VALUES (?, ?, ?, ?)";
         $stmtInsertPlanning = $conn->prepare($sqlInsertPlanning);
-        $stmtInsertPlanning->bind_param("iiss", $coursId, $jour, $dateCours, $heureDebut, $heureFin);
+        $stmtInsertPlanning->bind_param("iiss", $coursId, $jour, $heureDebut, $heureFin);
         $stmtInsertPlanning->execute();
     }
 
     // Rediriger vers la page de liste des cours après l'ajout
-    header("Location: liste_cours.php");
+    header("Location: liste_filiere.php");
     exit;
 }
 ?>
@@ -81,11 +80,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
             <div class="col-md col-12">
                 <div class="row page-title shadow-lg">
-                    <div class="fs-2 mt-3"> Ajouter un Cours </div>
+                    <div class="fs-2 mt-3">Ajouter un Cours</div>
                 </div>
                 <div class="row mt-4 fw-normal">
-                    <div class="col-md-6">
-                        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
+                    <div class="col-md-8 mx-auto">
+                        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="needs-validation" novalidate>
                             <div class="mb-3">
                                 <label for="nom_cours" class="form-label">Nom du Cours</label>
                                 <input type="text" class="form-control" id="nom_cours" name="nom_cours" required>
@@ -112,6 +111,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 <label for="enseignants" class="form-label">Enseignants</label>
                                 <select multiple class="form-control" id="enseignants" name="enseignants[]">
                                     <?php
+                                    $resultEnseignants = $conn->query($sqlEnseignants);
                                     while ($rowEnseignant = $resultEnseignants->fetch_assoc()) {
                                         echo '<option value="' . $rowEnseignant["matricule"] . '">' . $rowEnseignant["prenom"] . ' ' . $rowEnseignant["nom"] . '</option>';
                                     }
@@ -138,7 +138,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     <option value="7">Dimanche</option>
                                 </select>
                             </div>
-                            
+
                             <button type="submit" class="btn btn-primary btn-dark">Ajouter</button>
                         </form>
                     </div>
@@ -151,7 +151,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 
     <!-- Bootstrap Script -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"/>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"></script>
 </body>
 
 </html>

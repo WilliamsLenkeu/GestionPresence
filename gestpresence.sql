@@ -29,13 +29,10 @@ CREATE TABLE cours (
     FOREIGN KEY (classe_id) REFERENCES classe (id)
 );
 
--- Enumération pour les jours de la semaine
-CREATE TYPE jour_enum AS ENUM ('Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche');
-
 -- Table pour gérer les jours de la semaine
 CREATE TABLE jour_semaine (
     id INT NOT NULL AUTO_INCREMENT,
-    nom_jour jour_enum NOT NULL,
+    nom_jour VARCHAR(255) NOT NULL,
     PRIMARY KEY (id)
 );
 
