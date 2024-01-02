@@ -52,6 +52,13 @@ $stmtCoursFacultatifs->bind_param('s', $classe_id);
 $stmtCoursFacultatifs->execute();
 $resultCoursFacultatifs = $stmtCoursFacultatifs->get_result();
 
+// Vérifier si la classe a des cours facultatifs
+if ($resultCoursFacultatifs->num_rows === 0) {
+    // Rediriger vers la page suivante car la classe n'a pas de cours facultatifs
+    header('Location: dashbord_etudiant.php'); 
+    exit;
+}
+
 // Fermer la connexion
 $conn->close();
 ?>

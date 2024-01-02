@@ -23,18 +23,6 @@ $stmtProfil->bind_result($classeId);
 $stmtProfil->fetch();
 $stmtProfil->close();
 
-// Vérifier si l'étudiant a déjà rempli son profil
-$sqlCheckProfil = "SELECT utilisateur_matricule FROM attribution_cours WHERE utilisateur_matricule = ?";
-$stmtCheckProfil = $conn->prepare($sqlCheckProfil);
-$stmtCheckProfil->bind_param('s', $matricule);
-$stmtCheckProfil->execute();
-$stmtCheckProfil->store_result();
-
-// Si des données existent, rediriger vers le tableau de bord de l'étudiant
-if ($stmtCheckProfil->num_rows > 0) {
-    header('Location: dashboard_etudiant.php');
-    exit;
-}
 
 // Récupérer le nom de la classe
 $sqlNomClasse = "SELECT nom FROM classe WHERE id = ?";
