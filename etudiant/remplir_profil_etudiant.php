@@ -172,7 +172,7 @@ $conn->close();
                     ?>
                 </select>
             </div>
-            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="submit" class="btn btn-primary">Continuer</button>
         </form>
     </div>
 
