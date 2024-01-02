@@ -34,9 +34,10 @@ $stmtNomClasse->fetch();
 $stmtNomClasse->close();
 
 // Récupérer tous les ID des cours suivis par l'élève
-$sqlListeCours = "SELECT ac.id
+$sqlListeCours = "SELECT c.id
     FROM attribution_cours ac
     JOIN utilisateur u ON ac.utilisateur_matricule = u.matricule
+    JOIN cours c ON ac.cours_id = c.id
     WHERE u.matricule = ?";
 $stmtListeCours = $conn->prepare($sqlListeCours);
 $stmtListeCours->bind_param("i", $matricule);
@@ -63,16 +64,16 @@ $resultListeCours = $stmtListeCours->get_result();
                 $sommeAbsence = 0;
                 // Calculer les heures d'absence pour chaque cours
                 while ($row = $resultListeCours->fetch_assoc()) {
-
-                    $sqlInfos = "SELECT c.nom, COALESCE(SUM(pc.heure_fin - pc.heure_debut), 0) as heure_absence, p.justificatif
+                    $sqlInfos = "SELECT c.nom, COALESCE(SUM(TIME_TO_SEC(TIMEDIFF(pc.heure_fin, pc.heure_debut)) / 3600), 0) as heure_absence, p.justificatif
                         FROM cours c
                         JOIN planning_cours pc ON c.id = pc.cours_id
-                        JOIN Presence p ON p.cours_id = c.id 
-                        WHERE ea.present = 0 AND c.id = ? AND ea.utilisateur_matricule = ?
+                        LEFT JOIN presence p ON p.cours_id = c.id AND p.utilisateur_matricule = ?
+                        WHERE c.id = ? and p.present=0
+                        GROUP BY c.id
                         ";
 
                     $stmtInfos = $conn->prepare($sqlInfos);
-                    $stmtInfos->bind_param("is", $row['id'], $matricule);
+                    $stmtInfos->bind_param("ii", $matricule, $row['id']);
                     $stmtInfos->execute();
                     $resultInfos = $stmtInfos->get_result();
                     $infoRow = $resultInfos->fetch_assoc();
@@ -83,7 +84,7 @@ $resultListeCours = $stmtListeCours->get_result();
                         echo '<td>' . $infoRow['nom'] . '</td>';
                         echo '<td>' . $infoRow['heure_absence'] . '</td>';
                         // Vérifier si le motif est vide
-                        echo '<td>' . ($infoRow['motif'] ? $infoRow['motif'] : 'Aucun motif') . '</td>';
+                        echo '<td>' . ($infoRow['justificatif'] ? $infoRow['justificatif'] : 'Aucun motif') . '</td>';
                         echo '</tr>';
                         $sommeAbsence += $infoRow['heure_absence'];
                     }
