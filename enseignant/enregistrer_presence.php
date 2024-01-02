@@ -1,59 +1,59 @@
 <?php
+// Démarrez la session pour accéder aux variables de session
 session_start();
 
+// Vérifiez si le matricule est présent dans la session
 if (!isset($_SESSION['matricule'])) {
+    // Redirige vers la page logout.php du dossier parent
     header('Location: ../logout.php');
     exit;
 }
 
+// Inclure le fichier de connexion à la base de données
 include '../connexion.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Vérifier si des données de présence ont été soumises
-    if (isset($_POST['presence']) && is_array($_POST['presence'])) {
-        $matriculeList = array_keys($_POST['presence']);
+// Vérifier si des données de présence ont été soumises
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['cours_id'])) {
+    $coursId = $_POST['cours_id'];
 
-        // Récupérer l'ID du cours
-        $sqlCoursId = "SELECT id FROM cours WHERE nom = ?";
-        $stmtCoursId = $conn->prepare($sqlCoursId);
-        $stmtCoursId->bind_param('s', $_GET['cours']);
-        $stmtCoursId->execute();
-        $resultCoursId = $stmtCoursId->get_result();
+    // Préparez la requête pour insérer les présences dans la base de données
+    $sqlInsertPresence = "INSERT INTO presence (utilisateur_matricule, cours_id, date, present) VALUES (?, ?, NOW(), ?)";
+    $stmtInsertPresence = $conn->prepare($sqlInsertPresence);
 
-        if ($resultCoursId->num_rows > 0) {
-            // L'ID du cours existe
-            $coursId = $resultCoursId->fetch_assoc()['id'];
-
-            // Insérer les données de présence dans la table "presence"
-            $sqlInsertPresence = "INSERT INTO presence (utilisateur_matricule, cours_id, date, present, justificatif) VALUES (?, ?, CURRENT_DATE(), 1, ?) ON DUPLICATE KEY UPDATE present = 1, justificatif = ?";
-            $stmtInsertPresence = $conn->prepare($sqlInsertPresence);
-
-            foreach ($matriculeList as $matricule) {
-                // Vous devez définir le justificatif ici (vrai ou faux)
-                $justificatif = isset($_POST['presence'][$matricule]) ? 1 : 0;
-
-                $stmtInsertPresence->bind_param('iiss', $matricule, $coursId, $justificatif, $justificatif);
-                $stmtInsertPresence->execute();
-            }
-
-            $stmtInsertPresence->close();
-            $conn->close();
-
-            header('Location: dashboard_enseignant.php');
-            exit;
-        } else {
-            // L'ID du cours n'a pas été trouvé
-            header('Location: dashboard_enseignant.php?error=cours_not_found');
-            exit;
+    // Parcourez les données de présence et exécutez la requête pour "Présent"
+    if (isset($_POST['presence'])) {
+        $presenceData = $_POST['presence'];
+        foreach ($presenceData as $matricule => $present) {
+            $matricule = intval($matricule);
+            $present = intval($present);
+            $stmtInsertPresence->bind_param('iii', $matricule, $coursId, $present);
+            $stmtInsertPresence->execute();
         }
-    } else {
-        // Aucune donnée de présence soumise
-        header('Location: dashboard_enseignant.php');
-        exit;
     }
-} else {
-    // Rediriger si la méthode HTTP n'est pas POST
-    header('Location: dashboard_enseignant.php');
-    exit;
+
+    // Préparez la requête pour insérer les absences dans la base de données
+    $sqlInsertAbsence = "INSERT INTO presence (utilisateur_matricule, cours_id, date, present) VALUES (?, ?, NOW(), 0)";
+    $stmtInsertAbsence = $conn->prepare($sqlInsertAbsence);
+
+    // Parcourez les données d'absence et exécutez la requête pour "Absent"
+    if (isset($_POST['absence'])) {
+        $absenceData = $_POST['absence'];
+        foreach ($absenceData as $matricule => $absent) {
+            $matricule = intval($matricule);
+            $stmtInsertAbsence->bind_param('ii', $matricule, $coursId);
+            $stmtInsertAbsence->execute();
+        }
+    }
+
+    // Fermez les requêtes préparées
+    $stmtInsertPresence->close();
+    $stmtInsertAbsence->close();
 }
+
+// Fermez la connexion à la base de données
+$conn->close();
+
+// Redirigez l'utilisateur vers la page d'appel des étudiants
+header('Location: dashboard_enseignant.php');
+exit;
 ?>

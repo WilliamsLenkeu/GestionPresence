@@ -29,15 +29,26 @@ CREATE TABLE cours (
     FOREIGN KEY (classe_id) REFERENCES classe (id)
 );
 
--- Table pour gérer les plannings de cours liés à une classe
-CREATE TABLE planning_cours (
+-- Enumération pour les jours de la semaine
+CREATE TYPE jour_enum AS ENUM ('Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche');
+
+-- Table pour gérer les jours de la semaine
+CREATE TABLE jour_semaine (
+    id INT NOT NULL AUTO_INCREMENT,
+    nom_jour jour_enum NOT NULL,
+    PRIMARY KEY (id)
+);
+
+-- Table de liaison entre cours et jours de la semaine
+CREATE TABLE planning_cours_jour (
     id INT NOT NULL AUTO_INCREMENT,
     cours_id INT NOT NULL,
-    date DATE NOT NULL,
+    jour_id INT NOT NULL,
     heure_debut TIME NOT NULL,
     heure_fin TIME NOT NULL,
     PRIMARY KEY (id),
-    FOREIGN KEY (cours_id) REFERENCES cours (id)
+    FOREIGN KEY (cours_id) REFERENCES cours (id),
+    FOREIGN KEY (jour_id) REFERENCES jour_semaine (id)
 );
 
 -- Table pour attribuer des étudiants et enseignants à des cours spécifiques
@@ -88,5 +99,3 @@ CREATE TABLE information_enseignant (
     FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule),
     FOREIGN KEY (cours_id) REFERENCES cours (id)
 );
-
-

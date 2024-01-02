@@ -26,6 +26,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Ajout du champ facultatif pour les cours
     $facultatif = isset($_POST["facultatif"]) ? 1 : 0;
 
+    // Récupérer les données de date et heures
+    // $dateCours = $_POST["date_cours"];
+    $heureDebut = $_POST["heure_debut"];
+    $heureFin = $_POST["heure_fin"];
+
     // Insérer le cours dans la table "cours"
     $sqlInsertCours = "INSERT INTO cours (nom, description, facultatif, classe_id) VALUES (?, ?, ?, ?)";
     $stmtInsertCours = $conn->prepare($sqlInsertCours);
@@ -39,6 +44,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmtInsertAttribution = $conn->prepare($sqlInsertAttribution);
         $stmtInsertAttribution->bind_param("ii", $enseignant, $coursId);
         $stmtInsertAttribution->execute();
+    }
+
+    // Insérer les données de date et heures dans la table "planning_cours_jour"
+    $joursSemaine = isset($_POST["jours_semaine"]) ? $_POST["jours_semaine"] : [];
+    foreach ($joursSemaine as $jour) {
+        $sqlInsertPlanning = "INSERT INTO planning_cours_jour (cours_id, jour_id, date_cours, heure_debut, heure_fin) VALUES (?, ?, ?, ?, ?)";
+        $stmtInsertPlanning = $conn->prepare($sqlInsertPlanning);
+        $stmtInsertPlanning->bind_param("iiss", $coursId, $jour, $dateCours, $heureDebut, $heureFin);
+        $stmtInsertPlanning->execute();
     }
 
     // Rediriger vers la page de liste des cours après l'ajout
@@ -102,6 +116,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                         echo '<option value="' . $rowEnseignant["matricule"] . '">' . $rowEnseignant["prenom"] . ' ' . $rowEnseignant["nom"] . '</option>';
                                     }
                                     ?>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="heure_debut" class="form-label">Heure de Début</label>
+                                <input type="time" class="form-control" id="heure_debut" name="heure_debut" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="heure_fin" class="form-label">Heure de Fin</label>
+                                <input type="time" class="form-control" id="heure_fin" name="heure_fin" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="jours_semaine" class="form-label">Jours de la Semaine</label>
+                                <select multiple class="form-control" id="jours_semaine" name="jours_semaine[]">
+                                    <option value="1">Lundi</option>
+                                    <option value="2">Mardi</option>
+                                    <option value="3">Mercredi</option>
+                                    <option value="4">Jeudi</option>
+                                    <option value="5">Vendredi</option>
+                                    <option value="6">Samedi</option>
+                                    <option value="7">Dimanche</option>
                                 </select>
                             </div>
                             

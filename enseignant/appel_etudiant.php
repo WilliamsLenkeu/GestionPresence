@@ -87,6 +87,7 @@ $conn->close();
                                         <th scope="col">Matricule</th>
                                         <th scope="col">Classe</th>
                                         <th scope="col">Présent</th>
+                                        <th scope="col">Absent</th> <!-- Nouvelle colonne pour marquer l'absence -->
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -96,7 +97,14 @@ $conn->close();
                                             <td><?= $etudiant['nom'] . ' ' . $etudiant['prenom'] ?></td>
                                             <td><?= $etudiant['matricule'] ?></td>
                                             <td><?= $etudiant['classe_nom'] ?></td>
-                                            <td><input type="checkbox" name="presence[<?= $etudiant['matricule'] ?>]" value="present"></td>
+                                            <!-- Case à cocher pour "Présent" -->
+                                            <td>
+                                                <input type="checkbox" name="presence[<?= $etudiant['matricule'] ?>]" value="1" />
+                                            </td>
+                                            <!-- Case à cocher pour "Absent" -->
+                                            <td>
+                                                <input type="checkbox" name="absence[<?= $etudiant['matricule'] ?>]" value="1" />
+                                            </td>
                                         </tr>
                                     <?php endforeach; ?>
                                 </tbody>
