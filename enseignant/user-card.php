@@ -46,11 +46,13 @@ $infoStmt->close();
 $conn->close();
 ?>
 
+<!-- Le reste de votre code HTML peut maintenant utiliser les variables récupérées -->
 <div class="card my-3 shadow-sm">
     <div class="card-header">
         <h5 class="card-title mb-0">Informations Utilisateur</h5>
     </div>
     <div class="card-body">
+        <!-- Afficher les détails de l'utilisateur ici -->
         <p class="card-text">Matricule: <?php echo $matricule; ?></p>
         <p class="card-text">Nom: <?php echo htmlspecialchars($nom); ?></p>
         <p class="card-text">Prénom: <?php echo htmlspecialchars($prenom); ?></p>
