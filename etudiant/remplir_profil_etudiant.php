@@ -53,9 +53,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmtProfil->bind_param('sssss', $matricule, $nom, $prenom, $date_naissance, $classe_id);
     $profilSuccess = $stmtProfil->execute();
 
+    // Mettre à jour la classe_id dans la table utilisateur
+    if ($profilSuccess) {
+        $sqlUpdateUser = "UPDATE utilisateur SET classe_id = ? WHERE matricule = ?";
+        $stmtUpdateUser = $conn->prepare($sqlUpdateUser);
+        $stmtUpdateUser->bind_param('is', $classe_id, $matricule);
+        $updateUserSuccess = $stmtUpdateUser->execute();
+
+        if (!$updateUserSuccess) {
+            // En cas d'échec, annuler les changements
+            $conn->rollback();
+            echo 'Une erreur est survenue lors de la mise à jour de la classe pour l\'utilisateur. Veuillez réessayer.';
+            exit;
+        }
+    }
 
     // Vérifier si les deux requêtes ont réussi
-    if ($profilSuccess ) {
+    if ($profilSuccess && $updateUserSuccess) {
         // Valider les changements
         $conn->commit();
 
@@ -70,7 +84,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Fermer les déclarations
     $stmtProfil->close();
-    $stmtInfoEtudiant->close();
+    $stmtUpdateUser->close();
 }
 
 // Récupérer la liste des classes depuis la base de données

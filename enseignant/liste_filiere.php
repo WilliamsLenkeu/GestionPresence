@@ -96,12 +96,14 @@ $classes = $result->fetch_all(MYSQLI_ASSOC);
                                         echo '<td>' . $classeInfo['nom'] . '</td>';
                                         echo '<td>' . $classeInfo['description'] . '</td>';
                                         // Ajouter des boutons d'action pour un administrateur
-                                        echo '<td>';
-                                        echo '<a href="modifier_filiere.php?id=' . $classeInfo['id'] . '" class="btn btn-warning btn-sm">Modifier</a>';
-                                        echo ' ';
-                                        echo '<a href="supprimer_filiere.php?id=' . $classeInfo['id'] . '" class="btn btn-danger btn-sm">Supprimer</a>';
-                                        echo '</td>';
-                                        echo '</tr>';
+                                        if($isAdmin){
+                                            echo '<td>';
+                                            echo '<a href="modifier_filiere.php?id=' . $classeInfo['id'] . '" class="btn btn-warning btn-sm">Modifier</a>';
+                                            echo ' ';
+                                            echo '<a href="supprimer_filiere.php?id=' . $classeInfo['id'] . '" class="btn btn-danger btn-sm">Supprimer</a>';
+                                            echo '</td>';
+                                            echo '</tr>';
+                                        }
                                     }
                                 }
                                 ?>

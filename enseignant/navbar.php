@@ -20,8 +20,6 @@ if ($stmt->num_rows > 0) {
     $isAdmin = $adminStatus == 1;
 }
 
-$isAdmin = $_SESSION['administrateur'] ?? 0; // Par défaut, considère que l'utilisateur n'est pas administrateur
-
 ?>
 
 <nav class="navbar navbar-expand-lg flex-column border-bottom border-secondary h-100">
