@@ -115,7 +115,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             </div>
             <div class="col-md-2 border-start border-secondary">
-                <?php include '../templates/user-card.php'; ?>
+                <?php include './user-card.php'; ?>
             </div>
         </div>
     </div>

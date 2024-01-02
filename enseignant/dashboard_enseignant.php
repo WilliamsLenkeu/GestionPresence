@@ -89,7 +89,7 @@ if ($stmt->num_rows == 0) {
             <!-- Colonne de droite pour les informations de l'utilisateur -->
             <div class="col-md-2 border-start border-secondary">
                 <?php
-                include '../templates/user-card.php';
+                include './user-card.php';
                 ?>
             </div>
         </div>
