@@ -20,8 +20,17 @@ if ($conn->connect_error) {
 // Récupérer le matricule de l'utilisateur depuis la session
 $matricule = $_SESSION['matricule'];
 
-// Vérifier si l'étudiant a déjà rempli son profil
-$sqlCheckProfil = "SELECT utilisateur_matricule FROM information_etudiant WHERE utilisateur_matricule = ?";
+// Récupérer la classe_id depuis la table information_etudiant
+$sqlGetClasseId = "SELECT classe_id FROM information_etudiant WHERE utilisateur_matricule = ?";
+$stmtGetClasseId = $conn->prepare($sqlGetClasseId);
+$stmtGetClasseId->bind_param('s', $matricule);
+$stmtGetClasseId->execute();
+$stmtGetClasseId->bind_result($classe_id);
+$stmtGetClasseId->fetch();
+$stmtGetClasseId->close();
+
+// Vérifier si l'étudiant a déjà rempli ses cours facultatif
+$sqlCheckProfil = "SELECT utilisateur_matricule FROM attribution_cours WHERE utilisateur_matricule = ?";
 $stmtCheckProfil = $conn->prepare($sqlCheckProfil);
 $stmtCheckProfil->bind_param('s', $matricule);
 $stmtCheckProfil->execute();
@@ -36,60 +45,12 @@ if ($stmtCheckProfil->num_rows > 0) {
 // Fermer la déclaration
 $stmtCheckProfil->close();
 
-// Vérifier si le formulaire a été soumis
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Récupérer les données du formulaire
-    $nom = $_POST['nom'];
-    $prenom = $_POST['prenom'];
-    $date_naissance = $_POST['date_naissance'];
-    $classe_id = $_POST['classe_id'];
-
-    // Utilisation d'une transaction pour s'assurer que les deux requêtes réussissent ou échouent ensemble
-    $conn->begin_transaction();
-
-    // Insérer des données dans la table information_etudiant
-    $sqlProfil = "INSERT INTO information_etudiant (utilisateur_matricule, nom, prenom, date_naissance, classe_id) VALUES (?, ?, ?, ?, ?)";
-    $stmtProfil = $conn->prepare($sqlProfil);
-    $stmtProfil->bind_param('sssss', $matricule, $nom, $prenom, $date_naissance, $classe_id);
-    $profilSuccess = $stmtProfil->execute();
-
-    // Mettre à jour la classe_id dans la table utilisateur
-    if ($profilSuccess) {
-        $sqlUpdateUser = "UPDATE utilisateur SET classe_id = ? WHERE matricule = ?";
-        $stmtUpdateUser = $conn->prepare($sqlUpdateUser);
-        $stmtUpdateUser->bind_param('is', $classe_id, $matricule);
-        $updateUserSuccess = $stmtUpdateUser->execute();
-
-        if (!$updateUserSuccess) {
-            // En cas d'échec, annuler les changements
-            $conn->rollback();
-            echo 'Une erreur est survenue lors de la mise à jour de la classe pour l\'utilisateur. Veuillez réessayer.';
-            exit;
-        }
-    }
-
-    // Vérifier si les deux requêtes ont réussi
-    if ($profilSuccess && $updateUserSuccess) {
-        // Valider les changements
-        $conn->commit();
-
-        // Rediriger vers le tableau de bord de l'étudiant
-        header('Location: choix_cours_facultatif.php');
-        exit;
-    } else {
-        // Annuler les changements en cas d'échec
-        $conn->rollback();
-        echo 'Une erreur est survenue lors de l\'enregistrement. Veuillez réessayer.';
-    }
-
-    // Fermer les déclarations
-    $stmtProfil->close();
-    $stmtUpdateUser->close();
-}
-
-// Récupérer la liste des classes depuis la base de données
-$sqlClasses = "SELECT id, nom FROM classe";
-$resultClasses = $conn->query($sqlClasses);
+// Récupérer la liste des cours facultatifs de la classe
+$sqlCoursFacultatifs = "SELECT id, nom FROM cours WHERE classe_id = ? AND facultatif = 1";
+$stmtCoursFacultatifs = $conn->prepare($sqlCoursFacultatifs);
+$stmtCoursFacultatifs->bind_param('s', $classe_id);
+$stmtCoursFacultatifs->execute();
+$resultCoursFacultatifs = $stmtCoursFacultatifs->get_result();
 
 // Fermer la connexion
 $conn->close();
@@ -146,31 +107,19 @@ $conn->close();
 <body class="fw-bold">
     <div class="container-fluid dash d-flex justify-content-center align-items-center vh-100">
         <!-- Ajoutez votre formulaire ici -->
-        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="blur-background form-container">
+        <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" class="blur-background form-container needs-validation" novalidate>
             <!-- Insérez ici les champs du formulaire (nom, prénom, date de naissance, classe, etc.) -->
             <h2 class="mb-4 text-center">Remplir le Profil Etudiant</h2>
             <div class="mb-3">
-                <label for="nom" class="form-label">Nom :</label>
-                <input type="text" class="form-control" name="nom" required>
-            </div>
-            <div class="mb-3">
-                <label for="prenom" class="form-label">Prénom :</label>
-                <input type="text" class="form-control" name="prenom" required>
-            </div>
-            <div class="mb-3">
-                <label for="date_naissance" class="form-label">Date de Naissance :</label>
-                <input type="date" class="form-control" name="date_naissance" required>
-            </div>
-            <div class="mb-3">
-                <label for="classe_id" class="form-label">Classe :</label>
-                <select class="form-select" name="classe_id" required>
-                    <?php
-                    // Afficher les options de classe
-                    while ($rowClasse = $resultClasses->fetch_assoc()) {
-                        echo '<option value="' . $rowClasse['id'] . '">' . $rowClasse['nom'] . '</option>';
-                    }
-                    ?>
-                </select>
+                <!-- Afficher la liste des cours facultatifs sous forme de cases à cocher -->
+                <?php
+                while ($row = $resultCoursFacultatifs->fetch_assoc()) {
+                    echo '<div class="form-check">';
+                    echo '<input class="form-check-input" type="checkbox" name="cours[]" value="' . $row['id'] . '" id="cours' . $row['id'] . '">';
+                    echo '<label class="form-check-label" for="cours' . $row['id'] . '">' . $row['nom'] . '</label>';
+                    echo '</div>';
+                }
+                ?>
             </div>
             <button type="submit" class="btn btn-primary">Enregistrer</button>
         </form>
