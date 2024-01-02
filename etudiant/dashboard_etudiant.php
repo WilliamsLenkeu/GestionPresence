@@ -137,7 +137,7 @@ if ($countInscription == 0) {
 
 
         <!-- Section du tableau de bord -->
-        <div class="row dash-1">
+        <div class="row">
             <div class="col-md col-12 text-center">
                 <?php
                 include './navbar.php';
