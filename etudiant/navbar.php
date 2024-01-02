@@ -1,5 +1,4 @@
 <?php
-session_start();
 
 if (!isset($_SESSION['matricule'])) {
     header('Location: ../logout.php');
@@ -68,8 +67,8 @@ $resultListeCours = $stmtListeCours->get_result();
                         FROM cours c
                         JOIN planning_cours pc ON c.id = pc.cours_id
                         JOIN Presence p ON p.cours_id = c.id 
-                        WHERE ea.present = 0 AND c.id = ? AND ea.utilisateur_matricule = ?
-                        ";
+                        WHERE p.present = 0 AND c.id = ? AND p.utilisateur_matricule = ?";
+
 
                     $stmtInfos = $conn->prepare($sqlInfos);
                     $stmtInfos->bind_param("is", $row['id'], $matricule);
@@ -83,7 +82,7 @@ $resultListeCours = $stmtListeCours->get_result();
                         echo '<td>' . $infoRow['nom'] . '</td>';
                         echo '<td>' . $infoRow['heure_absence'] . '</td>';
                         // Vérifier si le motif est vide
-                        echo '<td>' . ($infoRow['motif'] ? $infoRow['motif'] : 'Aucun motif') . '</td>';
+                        echo '<td>' . ($infoRow['justificatif'] ? $infoRow['justificatif'] : 'Aucun motif') . '</td>';
                         echo '</tr>';
                         $sommeAbsence += $infoRow['heure_absence'];
                     }

@@ -5,6 +5,11 @@ if (!isset($_SESSION['matricule'])) {
     exit;
 }
 
+// Connexion à la base de données (à adapter selon votre configuration)
+include '../connexion.php';
+
+$conn = new mysqli($servername, $username, $password, $dbname);
+
 // Utilisation d'une requête préparée pour éviter les attaques par injection SQL
 $sql = "SELECT administrateur FROM utilisateur WHERE matricule = ?";
 $stmt = $conn->prepare($sql);

@@ -27,12 +27,12 @@ $stmtCoursId->close();
 
 // Récupérer les étudiants du cours depuis la base de données
 $sqlEtudiants = "
-    SELECT utilisateur.matricule, profil.nom, profil.prenom, classe.nom AS classe_nom
+    SELECT utilisateur.matricule, information_etudiant.nom, information_etudiant.prenom, classe.nom AS classe_nom
     FROM utilisateur
     INNER JOIN attribution_cours ON utilisateur.matricule = attribution_cours.utilisateur_matricule
     INNER JOIN cours ON attribution_cours.cours_id = cours.id
-    INNER JOIN classe ON utilisateur.classe_id = classe.id
-    INNER JOIN profil ON utilisateur.matricule = profil.utilisateur_matricule
+    INNER JOIN information_etudiant ON utilisateur.matricule = information_etudiant.utilisateur_matricule
+    INNER JOIN classe ON information_etudiant.classe_id = classe.id
     WHERE cours.id = ? AND attribution_cours.cours_id = cours.id;
 ";
 
@@ -78,30 +78,31 @@ $conn->close();
                             Aucun étudiant inscrit à ce cours.
                         </div>
                     <?php else : ?>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th scope="col">#</th>
-                                    <th scope="col">Nom</th>
-                                    <th scope="col">Matricule</th>
-                                    <th scope="col">Classe</th>
-                                    <th scope="col">Présent</th>
-                                    <th scope="col">Absent</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($etudiants as $index => $etudiant) : ?>
+                        <form method="post" action="enregistrer_presence.php">
+                            <table class="table">
+                                <thead>
                                     <tr>
-                                        <th scope="row"><?= $index + 1 ?></th>
-                                        <td><?= $etudiant['nom'] ?></td>
-                                        <td><?= $etudiant['matricule'] ?></td>
-                                        <td><?= $etudiant['classe_nom'] ?></td>
-                                        <td><input type="checkbox" name="present_<?= $index ?>" value="present"></td>
-                                        <td><input type="checkbox" name="absent_<?= $index ?>" value="absent"></td>
+                                        <th scope="col">#</th>
+                                        <th scope="col">Nom</th>
+                                        <th scope="col">Matricule</th>
+                                        <th scope="col">Classe</th>
+                                        <th scope="col">Présent</th>
                                     </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    <?php foreach ($etudiants as $index => $etudiant) : ?>
+                                        <tr>
+                                            <th scope="row"><?= $index + 1 ?></th>
+                                            <td><?= $etudiant['nom'] . ' ' . $etudiant['prenom'] ?></td>
+                                            <td><?= $etudiant['matricule'] ?></td>
+                                            <td><?= $etudiant['classe_nom'] ?></td>
+                                            <td><input type="checkbox" name="presence[<?= $etudiant['matricule'] ?>]" value="present"></td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                            <button type="submit" class="btn btn-primary">Enregistrer la présence</button>
+                        </form>
                     <?php endif; ?>
                 </div>
             </div>

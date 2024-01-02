@@ -88,3 +88,5 @@ CREATE TABLE information_enseignant (
     FOREIGN KEY (utilisateur_matricule) REFERENCES utilisateur (matricule),
     FOREIGN KEY (cours_id) REFERENCES cours (id)
 );
+
+

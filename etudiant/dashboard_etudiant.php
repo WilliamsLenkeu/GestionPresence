@@ -1,4 +1,47 @@
 <?php
+// Vérifier si l'utilisateur est connecté
+session_start();
+
+if (!isset($_SESSION['matricule'])) {
+    // Rediriger vers la page logout.php du dossier parent
+    header('Location: ../logout.php');
+    exit;
+}
+
+// Inclure le fichier de connexion à la base de données
+include '../connexion.php';
+
+// Récupérer la classe de l'étudiant
+$sqlClasse = "SELECT classe_id FROM utilisateur WHERE matricule = ?";
+$stmtClasse = $conn->prepare($sqlClasse);
+$stmtClasse->bind_param('s', $_SESSION['matricule']);
+$stmtClasse->execute();
+$resultClasse = $stmtClasse->get_result();
+$classeId = $resultClasse->fetch_assoc()['classe_id'];
+$stmtClasse->close();
+
+// Vérifier si l'étudiant est déjà inscrit à un cours non facultatif
+$sqlCheckInscription = "SELECT COUNT(*) AS count FROM attribution_cours 
+                       JOIN cours ON attribution_cours.cours_id = cours.id
+                       WHERE attribution_cours.utilisateur_matricule = ? AND cours.facultatif = 0";
+$stmtCheckInscription = $conn->prepare($sqlCheckInscription);
+$stmtCheckInscription->bind_param('s', $_SESSION['matricule']);
+$stmtCheckInscription->execute();
+$resultCheckInscription = $stmtCheckInscription->get_result();
+$countInscription = $resultCheckInscription->fetch_assoc()['count'];
+$stmtCheckInscription->close();
+
+if ($countInscription == 0) {
+    // L'étudiant n'est pas encore inscrit à un cours non facultatif, on l'inscrit
+    $sqlInscription = "INSERT INTO attribution_cours (utilisateur_matricule, cours_id) 
+                       SELECT ?, id FROM cours WHERE classe_id = ? AND facultatif = 0";
+    $stmtInscription = $conn->prepare($sqlInscription);
+    $stmtInscription->bind_param('si', $_SESSION['matricule'], $classeId);
+    $stmtInscription->execute();
+    $stmtInscription->close();
+}
+
+// Le reste du code HTML
 ?>
 
 <!DOCTYPE html>
