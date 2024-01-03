@@ -102,8 +102,8 @@ function afficherBoutonsActions()
                                         // Ajouter des boutons d'action si l'utilisateur est administrateur
                                         if ($isAdmin) {
                                             echo '<td>';
-                                            echo '<a href="modifier_cours.php?id=' . $rowCours['id'] . '" class="btn btn-warning me-3">Modifier</a>';
-                                            echo '<a href="supprimer_cours.php?id=' . $rowCours['id'] . '" class="btn btn-danger" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer ce cours ?\')">Supprimer</a>';
+                                            echo '<a href="modifier_cours.php?id=' . $rowCours['id'] . '" class="btn btn-sm btn-warning me-3">Modifier</a>';
+                                            echo '<a href="supprimer_cours.php?id=' . $rowCours['id'] . '" class="btn btn-sm btn-danger" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer ce cours ?\')">Supprimer</a>';
                                             echo '</td>';
                                         }
 
