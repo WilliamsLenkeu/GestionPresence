@@ -107,7 +107,7 @@ $etudiants = $result->fetch_all(MYSQLI_ASSOC);
                                     echo '<td>' . $etudiant['nom_classe'] . '</td>'; // Afficher le nom de la classe
                                     if ($isAdmin) {
                                         echo '<td>';
-                                        echo '<a href="modifier_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-warning me-3 btn-sm">Modifier</a>';
+                                        // echo '<a href="modifier_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-warning me-3 btn-sm">Modifier</a>';
                                         echo '<a href="supprimer_etudiant.php?matricule=' . $etudiant['matricule'] . '" class="btn btn-danger btn-sm" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer cet étudiant ?\')">Supprimer</a>';
                                         echo '</td>';
                                     }

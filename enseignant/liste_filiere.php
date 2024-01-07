@@ -99,7 +99,7 @@ $classes = $result->fetch_all(MYSQLI_ASSOC);
                                         // Ajouter des boutons d'action pour un administrateur
                                         if($isAdmin){
                                             echo '<td>';
-                                            echo '<a href="modifier_filiere.php?id=' . $classeInfo['id'] . '" class="btn btn-warning btn-sm">Modifier</a>';
+                                            // echo '<a href="modifier_filiere.php?id=' . $classeInfo['id'] . '" class="btn btn-warning btn-sm">Modifier</a>';
                                             echo ' ';
                                             echo '<a href="supprimer_filiere.php?id=' . $classeInfo['id'] . '" class="btn btn-danger btn-sm">Supprimer</a>';
                                             echo '</td>';

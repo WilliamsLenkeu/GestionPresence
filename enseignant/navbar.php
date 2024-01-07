@@ -51,7 +51,7 @@ if ($stmt->num_rows > 0) {
                 <?php if ($isAdmin == 1) : ?>
                     <!-- Ajoutez ce bouton uniquement si l'utilisateur est un administrateur -->
                     <li class="nav-item btn btn-outline-secondary my-2 shadow-sm">
-                        <a class="nav-link" href="./page_administrateur.php">
+                        <a class="nav-link" href="./gestion_utilsateur.php">
                             <svg class="mb-1" xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-gear" viewBox="0 0 16 16">
                                 <path d="M3.13 9a6.002 6.002 0 0 1 10.742 0h1.414a8 8 0 0 0-12.156 0H3.129zM8 10a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/>
                                 <path d="M8 11a4 4 0 1 1 0-8 4 4 0 0 1 0 8z"/>
