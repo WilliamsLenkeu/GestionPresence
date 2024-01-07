@@ -1,8 +1,8 @@
 <?php
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "gestPresence";
+    $servername = "sql105.infinityfree.com";
+    $username = "if0_35744342";
+    $password = "l1e2n3k4e5u6";
+    $dbname = "if0_35744342_gestpresence";
 
     $conn = new mysqli($servername, $username, $password, $dbname);
 

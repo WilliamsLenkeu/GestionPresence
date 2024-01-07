@@ -83,39 +83,34 @@ function afficherBoutonsActions()
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php
-                                // Afficher la liste des cours
-                                $sqlCours = "SELECT c.id, c.nom, c.description, c.facultatif, cl.nom AS nom_classe
-                                            FROM cours c
-                                            LEFT JOIN classe cl ON c.classe_id = cl.id";
-                                $resultCours = $conn->query($sqlCours);
+                            <?php
+                            // Afficher la liste des cours
+                            foreach ($cours as $rowCours) {
+                                echo '<tr class="fs-5">';
+                                echo '<th scope="row">' . $rowCours['id'] . '</th>';
+                                echo '<td>' . $rowCours['nom'] . '</td>';
+                                echo '<td>' . $rowCours['description'] . '</td>';
+                                echo '<td>' . ($rowCours['facultatif'] ? 'Oui' : 'Non') . '</td>';
 
-                                if ($resultCours->num_rows > 0) {
-                                    while ($rowCours = $resultCours->fetch_assoc()) {
-                                        echo '<tr class="fs-5">';
-                                        echo '<th scope="row">' . $rowCours['id'] . '</th>';
-                                        echo '<td>' . $rowCours['nom'] . '</td>';
-                                        echo '<td>' . $rowCours['description'] . '</td>';
-                                        echo '<td>' . ($rowCours['facultatif'] ? 'Oui' : 'Non') . '</td>';
-                                        echo '<td>' . $rowCours['nom_classe'] . '</td>';
-
-                                        // Ajouter des boutons d'action si l'utilisateur est administrateur
-                                        if ($isAdmin) {
-                                            echo '<td>';
-                                            // echo '<a href="modifier_cours.php?id=' . $rowCours['id'] . '" class="btn btn-sm btn-warning me-3">Modifier</a>';
-                                            echo '<a href="supprimer_cours.php?id=' . $rowCours['id'] . '" class="btn btn-sm btn-danger" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer ce cours ?\')">Supprimer</a>';
-                                            echo '</td>';
-                                        }
-
-                                        echo '</tr>';
-                                    }
-                                } else {
-                                    // Aucun cours trouvé dans la base de données
-                                    echo '<tr>';
-                                    echo '<td colspan="6" class="text-center">Aucun cours existant.</td>';
-                                    echo '</tr>';
+                                // Ajouter des boutons d'action si l'utilisateur est administrateur
+                                if ($isAdmin) {
+                                    echo '<td>';
+                                    // echo '<a href="modifier_cours.php?id=' . $rowCours['id'] . '" class="btn btn-sm btn-warning me-3">Modifier</a>';
+                                    echo '<a href="supprimer_cours.php?id=' . $rowCours['id'] . '" class="btn btn-sm btn-danger" onclick="return confirm(\'Êtes-vous sûr de vouloir supprimer ce cours ?\')">Supprimer</a>';
+                                    echo '</td>';
                                 }
-                                ?>
+
+                                echo '</tr>';
+                            }
+
+                            if (empty($cours)) {
+                                // Aucun cours trouvé dans la base de données
+                                echo '<tr>';
+                                echo '<td colspan="6" class="text-center">Aucun cours existant.</td>';
+                                echo '</tr>';
+                            }
+                            ?>
+
                             </tbody>
                         </table>
                     </div>
